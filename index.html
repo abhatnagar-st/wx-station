@@ -5,54 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Station Weather &amp; Disruption Outlook</title>
 <style>
-:root{
-  --text:#2C2C2B;--text-2:#7D7A75;--canvas:#fff;--soft:#F9F8F7;
-  --surface-2:#F0EFED;--border:#E6E5E3;
-  --blue:#2783DE;--blue-soft:#E5F2FC;
-  --green:#46A171;--green-soft:#E8F1EC;
-  --orange:#D5803B;--orange-soft:#FBEBDE;
-  --red:#E56458;--red-soft:#FCE9E7;
-  --r:12px;--sh:0 1px 2px rgba(0,0,0,.05),0 4px 12px rgba(0,0,0,.04);
-  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
-  --mono:Menlo,Consolas,'SF Mono',monospace;
-}
-@media(prefers-color-scheme:dark){
-  :root{
-    --text:#fff;--text-2:rgba(255,255,255,.65);
-    --canvas:#191919;--soft:#202020;--surface-2:#383836;
-    --border:rgba(255,255,255,.2);
-    --blue:#5E9FE8;--blue-soft:rgba(94,159,232,.12);
-    --green:#72BC8F;--green-soft:rgba(114,188,143,.12);
-    --orange:#DE9255;--orange-soft:rgba(222,146,85,.12);
-    --red:#E97366;--red-soft:rgba(233,115,102,.12);
-    --sh:0 1px 2px rgba(0,0,0,.4),0 4px 12px rgba(0,0,0,.3);
-  }
-}
+:root{--text:#2C2C2B;--text-2:#7D7A75;--canvas:#fff;--soft:#F9F8F7;--surface-2:#F0EFED;--border:#E6E5E3;--blue:#2783DE;--blue-soft:#E5F2FC;--green:#46A171;--green-soft:#E8F1EC;--orange:#D5803B;--orange-soft:#FBEBDE;--red:#E56458;--red-soft:#FCE9E7;--r:12px;--sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;--mono:Menlo,Consolas,"SF Mono",monospace}
 *{box-sizing:border-box}
-body{margin:0;font-family:var(--sans);font-size:16px;line-height:1.5;color:var(--text);background:var(--canvas);-webkit-font-smoothing:antialiased}
+body{margin:0;font-family:var(--sans);font-size:16px;line-height:1.5;color:var(--text);background:var(--canvas)}
 .wrap{max-width:1000px;margin:0 auto;padding:32px 24px 64px}
 .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:4px}
 h1{font-size:30px;line-height:1.2;margin:0;letter-spacing:-.01em}
-.version-badge{font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--blue-soft);color:var(--blue);border:1px solid var(--blue);white-space:nowrap;align-self:flex-start;margin-top:6px}
+.vbadge{font-size:12px;font-weight:700;padding:4px 12px;border-radius:999px;background:var(--blue-soft);color:var(--blue);border:1px solid var(--blue);white-space:nowrap;margin-top:6px}
 .sub{color:var(--text-2);font-size:15px;margin:4px 0 0}
 .sbar{display:flex;gap:12px;flex-wrap:wrap;background:var(--soft);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin:24px 0 8px}
 .field{flex:1 1 260px;display:flex;flex-direction:column;gap:6px}
 .field label{font-size:13px;color:var(--text-2);font-weight:600}
-.field input{font-family:var(--sans);font-size:16px;color:var(--text);background:var(--canvas);border:1px solid var(--border);border-radius:8px;padding:12px 14px;min-height:44px;text-transform:uppercase;outline:none}
+.field input{font-size:16px;color:var(--text);background:var(--canvas);border:1px solid var(--border);border-radius:8px;padding:12px 14px;min-height:44px;text-transform:uppercase;outline:none;font-family:var(--sans)}
 .field input::placeholder{text-transform:none;color:var(--text-2)}
 .field input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
-button.go{align-self:flex-end;min-height:44px;padding:0 22px;font-family:var(--sans);font-size:15px;font-weight:600;color:#fff;background:var(--blue);border:none;border-radius:8px;cursor:pointer}
-button.go:hover{filter:brightness(.94)}
+button.go{align-self:flex-end;min-height:44px;padding:0 22px;font-size:15px;font-weight:600;color:#fff;background:var(--blue);border:none;border-radius:8px;cursor:pointer;font-family:var(--sans)}
+button.go:hover{opacity:.9}
 button.go:disabled{opacity:.5;cursor:default}
 .hint{font-size:13px;color:var(--text-2);margin:4px 2px 0}
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .chip{font-size:13px;padding:5px 12px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);cursor:pointer}
 .chip:hover{border-color:var(--blue);color:var(--blue)}
-.state{text-align:center;padding:48px 16px;color:var(--text-2)}
+.state{text-align:center;padding:48px 16px;color:var(--text-2);font-size:15px}
 .spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.err{background:var(--red-soft);border:1px solid var(--red);color:var(--text);border-radius:var(--r);padding:14px 16px;margin-top:16px;font-size:14px;line-height:1.6}
-.assess{border-radius:var(--r);padding:18px 20px;margin:24px 0 8px;display:flex;gap:16px;align-items:flex-start;border:1px solid var(--border);box-shadow:var(--sh)}
+.err-box{background:var(--red-soft);border:1px solid var(--red);border-radius:var(--r);padding:14px 16px;margin-top:16px;font-size:14px;line-height:1.7}
+.assess{border-radius:var(--r);padding:18px 20px;margin:24px 0 8px;display:flex;gap:16px;align-items:flex-start;border:1px solid var(--border);box-shadow:0 1px 2px rgba(0,0,0,.05),0 4px 12px rgba(0,0,0,.04)}
 .assess .ic{font-size:26px;line-height:1}
 .assess h2{margin:0 0 4px;font-size:18px}
 .assess p{margin:0;font-size:14px;color:var(--text-2)}
@@ -64,34 +42,27 @@ button.go:disabled{opacity:.5;cursor:default}
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:12px;margin-bottom:12px}
 .metric{background:var(--soft);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px}
 .metric .k{font-size:12px;color:var(--text-2);text-transform:uppercase;letter-spacing:.03em}
-.metric .v{font-size:22px;font-weight:650;margin-top:4px}
+.metric .v{font-size:22px;font-weight:700;margin-top:4px}
 .metric .u{font-size:13px;color:var(--text-2);font-weight:400}
 .raw{font-family:var(--mono);font-size:13px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:4px;overflow-x:auto;white-space:pre-wrap;word-break:break-word}
 .fcards{display:flex;flex-direction:column;gap:14px}
-.fcard{border:1px solid var(--border);border-left-width:5px;border-radius:var(--r);background:var(--canvas);padding:16px 18px;box-shadow:var(--sh)}
-.fcard.vfr{border-left-color:var(--green)}
-.fcard.mvfr{border-left-color:var(--blue)}
-.fcard.ifr{border-left-color:var(--orange)}
-.fcard.lifr{border-left-color:var(--red)}
-.fcard-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
-.ftime{font-weight:650;font-size:15px}
+.fcard{border:1px solid var(--border);border-left-width:5px;border-radius:var(--r);padding:16px 18px;box-shadow:0 1px 2px rgba(0,0,0,.05),0 4px 12px rgba(0,0,0,.04)}
+.fcard.vfr{border-left-color:var(--green)}.fcard.mvfr{border-left-color:var(--blue)}.fcard.ifr{border-left-color:var(--orange)}.fcard.lifr{border-left-color:var(--red)}
+.ftop{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.ftime{font-weight:700;font-size:15px}
 .ftime small{display:block;font-weight:400;color:var(--text-2);font-size:12px;margin-top:2px}
 .cat{font-size:12px;font-weight:700;letter-spacing:.04em;padding:4px 10px;border-radius:999px;white-space:nowrap}
-.cat.vfr{background:var(--green-soft);color:var(--green)}
-.cat.mvfr{background:var(--blue-soft);color:var(--blue)}
-.cat.ifr{background:var(--orange-soft);color:var(--orange)}
-.cat.lifr{background:var(--red-soft);color:var(--red)}
+.cat.vfr{background:var(--green-soft);color:var(--green)}.cat.mvfr{background:var(--blue-soft);color:var(--blue)}.cat.ifr{background:var(--orange-soft);color:var(--orange)}.cat.lifr{background:var(--red-soft);color:var(--red)}
 .fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px 16px;font-size:14px;margin-bottom:10px}
 .fgrid .k{color:var(--text-2);font-size:12px;text-transform:uppercase;letter-spacing:.02em}
 .fgrid .v{font-weight:600;margin-top:1px}
 .action{display:flex;gap:10px;align-items:flex-start;background:var(--soft);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px}
-.wx-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
-.wxt{font-size:12px;padding:3px 9px;border-radius:6px;background:var(--surface-2);border:1px solid var(--border)}
-.wxt.risk{background:var(--red-soft);border-color:var(--red);color:var(--red)}
-.wxt.warn{background:var(--orange-soft);border-color:var(--orange);color:var(--orange)}
+.wtags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.wtag{font-size:12px;padding:3px 9px;border-radius:6px;background:var(--surface-2);border:1px solid var(--border)}
+.wtag.risk{background:var(--red-soft);border-color:var(--red);color:var(--red)}
 footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--border);font-size:13px;color:var(--text-2)}
-.leg-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px}
-.leg-item{display:flex;align-items:center;gap:6px}
+.legrow{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px}
+.legitem{display:flex;align-items:center;gap:6px}
 .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
 .dot.vfr{background:var(--green)}.dot.mvfr{background:var(--blue)}.dot.ifr{background:var(--orange)}.dot.lifr{background:var(--red)}
 @media(max-width:480px){.wrap{padding:24px 16px 48px}h1{font-size:24px}button.go{flex:1 1 100%;align-self:stretch}}
@@ -101,10 +72,9 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--border);font-
 <div class="wrap">
   <div class="topbar">
     <h1>Station Weather &amp; Disruption Outlook</h1>
-    <span class="version-badge">v2.1 &mdash; Jul 27 2026</span>
+    <span class="vbadge">v3.0 &mdash; Jul 27 2026</span>
   </div>
-  <p class="sub">Enter an airport ICAO code to pull live observations (METAR) and the terminal forecast (TAF) from aviationweather.gov, translated into action blocks for disruption decisions.</p>
-
+  <p class="sub">Enter an airport ICAO code to pull live METAR and TAF from aviationweather.gov, displayed as action blocks for disruption decisions.</p>
   <div class="sbar">
     <div class="field">
       <label for="apt">Airport (ICAO code)</label>
@@ -112,171 +82,132 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--border);font-
     </div>
     <button class="go" id="go">Get forecast</button>
   </div>
-  <p class="hint">Use the 4-letter ICAO code (Toronto City = CYTZ, JFK = KJFK). Quick picks:</p>
+  <p class="hint">4-letter ICAO code only (Toronto City = CYTZ, JFK = KJFK). Quick picks:</p>
   <div class="chips" id="chips"></div>
   <div id="out"></div>
-
   <footer>
-    <strong>Flight category legend</strong> &mdash; derived from ceiling &amp; visibility:
-    <div class="leg-row">
-      <span class="leg-item"><span class="dot vfr"></span> VFR &middot; ceiling &gt;3000 ft &amp; vis &gt;5 mi</span>
-      <span class="leg-item"><span class="dot mvfr"></span> MVFR &middot; 1000&ndash;3000 ft or 3&ndash;5 mi</span>
-      <span class="leg-item"><span class="dot ifr"></span> IFR &middot; 500&ndash;1000 ft or 1&ndash;3 mi</span>
-      <span class="leg-item"><span class="dot lifr"></span> LIFR &middot; &lt;500 ft or &lt;1 mi</span>
+    <strong>Flight category legend</strong> &mdash; ceiling &amp; visibility thresholds:
+    <div class="legrow">
+      <span class="legitem"><span class="dot vfr"></span> VFR &gt;3000 ft &amp; &gt;5 mi</span>
+      <span class="legitem"><span class="dot mvfr"></span> MVFR 1000&ndash;3000 ft or 3&ndash;5 mi</span>
+      <span class="legitem"><span class="dot ifr"></span> IFR 500&ndash;1000 ft or 1&ndash;3 mi</span>
+      <span class="legitem"><span class="dot lifr"></span> LIFR &lt;500 ft or &lt;1 mi</span>
     </div>
-    <p style="margin-top:10px">Data: NOAA/NWS Aviation Weather Center (aviationweather.gov). METAR ~hourly + SPECI; TAF every 6 h + amendments.</p>
+    <p style="margin-top:10px">Data: NOAA/NWS Aviation Weather Center (aviationweather.gov). METAR ~hourly; TAF every 6h.</p>
   </footer>
 </div>
-
 <script>
-const VERSION = 'v2.1 — Jul 27 2026';
-const API = 'https://aviationweather.gov/api/data';
-
-// Ordered list of CORS proxy strategies to try
-  url => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url),
-  url => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url),
-  url => 'https://corsproxy.io/?url=' + encodeURIComponent(url),
-  url => url
-];
-
-const QUICK = [
-  ['CYTZ','Toronto City'],['CYYZ','Toronto Pearson'],['KJFK','New York JFK'],
-  ['KBOS','Boston'],['KORD','Chicago O\'Hare'],['EGLL','London Heathrow']
-];
-
-const out  = document.getElementById('out');
-const input= document.getElementById('apt');
-const goBtn= document.getElementById('go');
-
-QUICK.forEach(([code,name])=>{
-  const c=document.createElement('button');
-  c.className='chip';c.textContent=`${code} \u00b7 ${name}`;
-  c.onclick=()=>{input.value=code;run();};
+var QUICK=[['CYTZ','Toronto City'],['CYYZ','Toronto Pearson'],['KJFK','New York JFK'],['KBOS','Boston'],['KORD',"Chicago O'Hare"],['EGLL','London Heathrow']];
+var API='https://aviationweather.gov/api/data';
+var PROXIES=['https://api.allorigins.win/raw?url=','https://api.codetabs.com/v1/proxy?quest=','https://corsproxy.io/?url='];
+var out=document.getElementById('out');
+var input=document.getElementById('apt');
+var goBtn=document.getElementById('go');
+QUICK.forEach(function(item){
+  var c=document.createElement('button');
+  c.className='chip';
+  c.textContent=item[0]+' · '+item[1];
+  c.onclick=function(){input.value=item[0];run();};
   document.getElementById('chips').appendChild(c);
 });
-goBtn.onclick=run;
-input.addEventListener('keydown',e=>{if(e.key==='Enter')run();});
-
-function esc(s){return String(s??'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));}
-
-async function fetchWithFallback(url){
-  let lastErr;
-  for(const proxy of PROXIES){
-    try{
-      const r=await fetch(proxy(url),{signal:AbortSignal.timeout(8000)});
-      if(!r.ok)throw new Error(`HTTP ${r.status}`);
-      const txt=await r.text();
-      return JSON.parse(txt);
-    }catch(e){lastErr=e;}
-  }
-  throw lastErr||new Error('All proxies failed');
+goBtn.addEventListener('click',run);
+input.addEventListener('keydown',function(e){if(e.key==='Enter')run();});
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function xget(url,pi,cb){
+  if(pi>=PROXIES.length){cb(new Error('All proxies failed'),null);return;}
+  var x=new XMLHttpRequest();
+  x.open('GET',PROXIES[pi]+encodeURIComponent(url));
+  x.timeout=12000;
+  x.onload=function(){if(x.status>=200&&x.status<300){try{cb(null,JSON.parse(x.responseText));}catch(e){xget(url,pi+1,cb);}}else{xget(url,pi+1,cb);}}
+  x.onerror=function(){xget(url,pi+1,cb);};
+  x.ontimeout=function(){xget(url,pi+1,cb);};
+  x.send();
 }
-
-async function run(){
-  const id=input.value.trim().toUpperCase();
+function run(){
+  var id=input.value.trim().toUpperCase();
   if(!id){input.focus();return;}
   goBtn.disabled=true;
-  out.innerHTML=`<div class="state"><div class="spinner"></div>Fetching live data for ${esc(id)}…</div>`;
-  try{
-    const [metar,taf]=await Promise.all([
-      fetchWithFallback(`${API}/metar?ids=${encodeURIComponent(id)}&format=json`),
-      fetchWithFallback(`${API}/taf?ids=${encodeURIComponent(id)}&format=json`)
-    ]);
-    render(id,Array.isArray(metar)?metar[0]:null,Array.isArray(taf)?taf[0]:null);
-  }catch(e){
-    out.innerHTML=`<div class="err"><b>Could not fetch data after trying multiple sources.</b><br>Error: ${esc(e.message)}<br><br>Check your internet connection and try again. If the issue persists the weather API or all proxies may be temporarily unavailable.</div>`;
-  }finally{goBtn.disabled=false;}
+  out.innerHTML='<div class="state"><div class="spinner"></div>Fetching live data for '+esc(id)+'…</div>';
+  var done=0,metar=null,taf=null,errs=[];
+  function finish(){
+    done++;
+    if(done<2)return;
+    goBtn.disabled=false;
+    if(!metar&&!taf){out.innerHTML='<div class="err-box"><b>Could not fetch data.</b><br>'+esc(errs.join(' | '))+'<br><br>Check your internet connection and try again.</div>';return;}
+    render(id,metar,taf);
+  }
+  xget(API+'/metar?ids='+encodeURIComponent(id)+'&format=json',0,function(e,d){if(e)errs.push(e.message);else metar=Array.isArray(d)?d[0]:d;finish();});
+  xget(API+'/taf?ids='+encodeURIComponent(id)+'&format=json',0,function(e,d){if(e)errs.push(e.message);else taf=Array.isArray(d)?d[0]:d;finish();});
 }
-
-function ceilingFt(clouds){
-  if(!clouds?.length)return Infinity;
-  let c=Infinity;
-  clouds.forEach(cl=>{if(['BKN','OVC','OVX','VV'].includes((cl.cover||'').toUpperCase())&&cl.base!=null)c=Math.min(c,cl.base);});
+function ceilFt(clouds){
+  if(!clouds||!clouds.length)return Infinity;
+  var c=Infinity;
+  for(var i=0;i<clouds.length;i++){var cv=(clouds[i].cover||'').toUpperCase();if(['BKN','OVC','OVX','VV'].indexOf(cv)>=0&&clouds[i].base!=null)c=Math.min(c,clouds[i].base);}
   return c;
 }
-function visMi(v){if(v==null)return null;if(typeof v==='string'){const n=parseFloat(v.replace('+',''));return isNaN(n)?null:n;}return v;}
-function category(ceil,vis){
-  const v=vis??99,c=ceil??Infinity;
-  if(c<500||v<1)return'LIFR';
-  if(c<1000||v<3)return'IFR';
-  if(c<=3000||v<=5)return'MVFR';
-  return'VFR';
-}
-const WX={TS:'Thunderstorm',TSRA:'Thunderstorm + Rain',RA:'Rain',SHRA:'Showers',SN:'Snow',SHSN:'Snow showers',FZRA:'Freezing rain',FZDZ:'Freezing drizzle',FG:'Fog',BR:'Mist',HZ:'Haze',FU:'Smoke',GR:'Hail',GS:'Small hail',DZ:'Drizzle',PL:'Ice pellets',BLSN:'Blowing snow',SQ:'Squall',FC:'Funnel cloud',VCTS:'Nearby thunderstorm',VCSH:'Nearby showers'};
+function visMi(v){if(v==null)return null;if(typeof v==='string'){var n=parseFloat(v.replace('+',''));return isNaN(n)?null:n;}return v;}
+function calcCat(ceil,vis){var v=vis==null?99:vis,c=ceil==null?Infinity:ceil;if(c<500||v<1)return'LIFR';if(c<1000||v<3)return'IFR';if(c<=3000||v<=5)return'MVFR';return'VFR';}
+var WX={TS:'Thunderstorm',TSRA:'Thunderstorm+Rain',RA:'Rain',SHRA:'Showers',SN:'Snow',SHSN:'Snow showers',FZRA:'Freezing rain',FZDZ:'Freezing drizzle',FG:'Fog',BR:'Mist',HZ:'Haze',FU:'Smoke',GR:'Hail',DZ:'Drizzle',PL:'Ice pellets',BLSN:'Blowing snow',SQ:'Squall',VCTS:'Nearby thunderstorm',VCSH:'Nearby showers'};
 function wxDecode(str){
   if(!str)return[];
-  return str.trim().split(/\s+/).map(tok=>{
-    const clean=tok.replace(/^[+-]/,'').toUpperCase();
-    const int=tok.startsWith('+')?'Heavy ':tok.startsWith('-')?'Light ':'';
-    const base=WX[clean]||WX[clean.slice(0,2)]||clean;
-    const severe=/TS|FZ|GR|SQ|FC|\+SN|\+RA|BLSN|PL/i.test(tok);
-    return{label:int+base,severe};
-  });
+  return str.trim().split(/\s+/).map(function(tok){var cl=tok.replace(/^[+-]/,'').toUpperCase();var pre=tok.charAt(0)==='+' ? 'Heavy ':tok.charAt(0)==='-'?'Light ':'';var base=WX[cl]||WX[cl.slice(0,4)]||WX[cl.slice(0,2)]||cl;var sev=/TS|FZ|GR|\+SN|\+RA|BLSN|PL/i.test(tok);return{label:pre+base,severe:sev};});
 }
-function fmtZ(iso){
-  if(!iso)return'';
-  const d=new Date(iso);
-  return isNaN(d)?esc(iso):d.toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+function fmtZ(v){
+  if(!v)return'';
+  var d=new Date(typeof v==='number'?v*1000:v);
+  return isNaN(d.getTime())?esc(String(v)):d.toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
 }
-function windTxt(dir,spd,gst){
-  if(spd==null)return'\u2014';
-  return`${dir==null||dir===0?'Variable':dir+'\u00b0'} @ ${spd} kt${gst?' G'+gst:''}`;
+function windStr(dir,spd,gst){if(spd==null)return'—';var t=(dir==null||dir===0?'Variable':dir+'°')+' @ '+spd+' kt';if(gst)t+=' G'+gst;return t;}
+function getAction(ct,spd,gst,wx){
+  var haz=wx.filter(function(w){return w.severe;}).map(function(w){return w.label;});
+  var hw=(gst&&gst>=30)||(spd&&spd>=25);
+  if(ct==='LIFR')return{cls:'high',ic:'[HIGH]',txt:'<b>High disruption risk.</b> Near-minimums — expect delays, diversions, possible ground stops. Pre-position recovery and review OA rebooking capacity.'};
+  if(ct==='IFR')return{cls:'high',ic:'[ELEV]',txt:'<b>Elevated risk.</b> IFR conditions likely to slow arrival/departure rates. Build schedule buffer and watch for holding/flow programs.'};
+  if(hw||haz.length){var list=haz.concat(hw?['strong winds/gusts']:[]);return{cls:'med',ic:'[MON]',txt:'<b>Monitor.</b> '+list.join(', ')+' may cause intermittent delays. Watch amendments and de-ice/runway impacts.'};}
+  if(ct==='MVFR')return{cls:'med',ic:'[MON]',txt:'<b>Marginal.</b> Generally operable — watch trend, could tip into IFR. No action needed yet.'};
+  return{cls:'low',ic:'[OK]',txt:'<b>No weather constraint.</b> VFR conditions — no weather-driven disruption expected.'};
 }
-function actionFor(cat,wind,gust,wxItems){
-  const hazards=wxItems.filter(w=>w.severe).map(w=>w.label);
-  const highWind=(gust&&gust>=30)||(wind&&wind>=25);
-  if(cat==='LIFR')return{cls:'high',ic:'\ud83d\udd34',txt:'<b>High disruption risk.</b> Near-minimums \u2014 expect delays, diversions and possible ground stops. Pre-position recovery options and review OA rebooking capacity.'};
-  if(cat==='IFR')return{cls:'high',ic:'\ud83d\udfe0',txt:'<b>Elevated risk.</b> IFR conditions likely to slow arrival/departure rates. Build schedule buffer and watch for holding/flow programs.'};
-  if(highWind||hazards.length){const list=[...hazards.length?[hazards.join(', ')]:[],...highWind?['strong winds/gusts']:[]];return{cls:'med',ic:'\ud83d\udfe1',txt:`<b>Monitor.</b> ${list.join(' and ')} may cause intermittent delays. Watch amendments and de-ice/runway-config impacts.`};}
-  if(cat==='MVFR')return{cls:'med',ic:'\ud83d\udfe1',txt:'<b>Marginal.</b> Generally operable \u2014 watch trend, could tip into IFR.'};
-  return{cls:'low',ic:'\ud83d\udfe2',txt:'<b>No weather constraint.</b> VFR conditions \u2014 no weather-driven disruption expected.'};
-}
-function rank(cat){return{VFR:0,MVFR:1,IFR:2,LIFR:3}[cat]||0;}
-
+function rank(ct){return{VFR:0,MVFR:1,IFR:2,LIFR:3}[ct]||0;}
+function mbox(k,v,u){return'<div class="metric"><div class="k">'+esc(k)+'</div><div class="v">'+esc(v)+' <span class="u">'+esc(u)+'</span></div></div>';}
 function buildPeriods(taf){
   if(!taf||!Array.isArray(taf.fcsts))return[];
-  return taf.fcsts.map(f=>{
-    const ceil=ceilingFt(f.clouds),vis=visMi(f.visib);
-    return{from:f.timeFrom?new Date(f.timeFrom*1000).toISOString():f.timeBec||null,to:f.timeTo?new Date(f.timeTo*1000).toISOString():null,change:f.fcstChange||null,probability:f.probability||null,cat:category(ceil===Infinity?null:ceil,vis),ceil,vis,wx:wxDecode(f.wxString),wdir:f.wdir,wspd:f.wspd,wgst:f.wgst};
-  });
+  return taf.fcsts.map(function(f){var ceil=ceilFt(f.clouds),vis=visMi(f.visib);return{from:f.timeFrom||f.timeBec||null,to:f.timeTo||null,change:f.fcstChange||null,prob:f.probability||null,ct:calcCat(ceil===Infinity?null:ceil,vis),ceil:ceil,vis:vis,wx:wxDecode(f.wxString),wdir:f.wdir,wspd:f.wspd,wgst:f.wgst};});
 }
-
-function mbox(k,v,u){return`<div class="metric"><div class="k">${esc(k)}</div><div class="v">${esc(v)} <span class="u">${esc(u)}</span></div></div>`;}
-
 function fcard(p){
-  const cls=p.cat.toLowerCase(),act=actionFor(p.cat,p.wspd,p.wgst,p.wx);
-  let head=fmtZ(p.from);if(p.to)head+=` \u2192 ${fmtZ(p.to)}`;
-  const change=p.change?`<span class="wxt">${esc(p.change)}${p.probability?` ${p.probability}%`:''}</span>`:'';
-  const tags=change+p.wx.map(w=>`<span class="wxt${w.severe?' risk':''}">${esc(w.label)}</span>`).join('');
-  return`<div class="fcard ${cls}"><div class="fcard-top"><div class="ftime">${head}<small>Forecast period (times local)</small></div><span class="cat ${cls}">${p.cat}</span></div>${tags?`<div class="wx-tags">${tags}</div>`:''}<div class="fgrid"><div><div class="k">Wind</div><div class="v">${esc(windTxt(p.wdir,p.wspd,p.wgst))}</div></div><div><div class="k">Visibility</div><div class="v">${p.vis==null?'\u2014':esc(p.vis)+' mi'}</div></div><div><div class="k">Ceiling</div><div class="v">${p.ceil===Infinity?'None':esc(p.ceil.toLocaleString())+' ft'}</div></div></div><div class="action"><span>${act.ic}</span>&nbsp;<span>${act.txt}</span></div></div>`;
+  var cls=p.ct.toLowerCase(),act=getAction(p.ct,p.wspd,p.wgst,p.wx);
+  var head=fmtZ(p.from);if(p.to)head+=' → '+fmtZ(p.to);
+  var change=p.change?'<span class="wtag">'+esc(p.change)+(p.prob?' '+p.prob+'%':'')+' </span>':'';
+  var tags=change+p.wx.map(function(w){return'<span class="wtag'+(w.severe?' risk':'')+'">'+esc(w.label)+'</span>';}).join('');
+  return'<div class="fcard '+cls+'">'
+    +'<div class="ftop"><div class="ftime">'+head+'<small>Forecast period (local time)</small></div><span class="cat '+cls+'">'+p.ct+'</span></div>'
+    +(tags?'<div class="wtags">'+tags+'</div>':'')
+    +'<div class="fgrid"><div><div class="k">Wind</div><div class="v">'+esc(windStr(p.wdir,p.wspd,p.wgst))+'</div></div><div><div class="k">Visibility</div><div class="v">'+(p.vis==null?'—':esc(String(p.vis))+' mi')+'</div></div><div><div class="k">Ceiling</div><div class="v">'+(p.ceil===Infinity?'None':p.ceil.toLocaleString()+' ft')+'</div></div></div>'
+    +'<div class="action"><b>'+esc(act.ic)+'</b>&nbsp;<span>'+act.txt+'</span></div>'
+    +'</div>';
 }
-
 function render(id,metar,taf){
-  if(!metar&&!taf){out.innerHTML=`<div class="err"><b>No data for "${esc(id)}".</b> Check the 4-letter ICAO code (e.g. CYTZ not YTZ).</div>`;return;}
-  const name=(metar?.name)||(taf?.name)||id;
-  const periods=buildPeriods(taf);
-  let worst='VFR';
-  periods.forEach(p=>{if(rank(p.cat)>rank(worst))worst=p.cat;});
-  if(metar?.fltCat&&rank(metar.fltCat)>rank(worst))worst=metar.fltCat;
-  const oa=actionFor(worst,null,null,[]);
-  let html=`<div class="assess ${oa.cls}"><div class="ic">${oa.ic}</div><div><h2>${esc(name)} \u2014 outlook: ${worst}</h2><p>Worst expected category across current obs &amp; forecast window. ${worst==='VFR'?'No weather-driven disruption anticipated.':worst==='MVFR'?'Marginal \u2014 monitor for changes.':'Weather likely to impact operations \u2014 plan recovery options.'}</p></div></div>`;
-  html+=`<h3 class="sn">${esc(name)} <span style="color:var(--text-2);font-weight:400">(${esc(id)})</span></h3>`;
+  if(!metar&&!taf){out.innerHTML='<div class="err-box"><b>No data for "'+esc(id)+'".</b> Check the 4-letter ICAO code.</div>';return;}
+  var name=(metar&&metar.name)||(taf&&taf.name)||id;
+  var periods=buildPeriods(taf);
+  var worst='VFR';
+  periods.forEach(function(p){if(rank(p.ct)>rank(worst))worst=p.ct;});
+  if(metar&&metar.fltCat&&rank(metar.fltCat)>rank(worst))worst=metar.fltCat;
+  var oa=getAction(worst,null,null,[]);
+  var html='<div class="assess '+oa.cls+'"><div class="ic">'+esc(oa.ic)+'</div><div><h2>'+esc(name)+' — outlook: '+worst+'</h2><p>'+(worst==='VFR'?'No weather-driven disruption anticipated.':worst==='MVFR'?'Marginal — monitor for changes.':'Weather likely to impact operations — plan recovery options.')+'</p></div></div>';
+  html+='<h3 class="sn">'+esc(name)+' <span style="color:var(--text-2);font-weight:400">('+esc(id)+')</span></h3>';
   if(metar){
-    const ceil=ceilingFt(metar.clouds),vis=visMi(metar.visib);
-    const cat=metar.fltCat||category(ceil===Infinity?null:ceil,vis);
-    const wx=wxDecode(metar.wxString);
-    html+=`<div class="slabel">Current conditions (METAR) \u2014 observed ${fmtZ(metar.reportTime||metar.obsTime)}</div>`;
-    html+=`<div style="margin-bottom:10px"><span class="cat ${cat.toLowerCase()}">${cat}</span></div>`;
-    html+=`<div class="metrics">${mbox('Wind',windTxt(metar.wdir,metar.wspd,metar.wgst),'')}${mbox('Visibility',vis==null?'\u2014':vis,vis==null?'':'mi')}${mbox('Ceiling',ceil===Infinity?'None':ceil.toLocaleString(),ceil===Infinity?'':'ft')}${mbox('Temp',metar.temp==null?'\u2014':Math.round(metar.temp),metar.temp==null?'':'\u00b0C')}</div>`;
-    if(wx.length)html+=`<div class="wx-tags">${wx.map(w=>`<span class="wxt${w.severe?' risk':''}">${esc(w.label)}</span>`).join('')}</div>`;
-    if(metar.rawOb)html+=`<div class="raw">${esc(metar.rawOb)}</div>`;
+    var ceil=ceilFt(metar.clouds),vis=visMi(metar.visib);
+    var ct=metar.fltCat||calcCat(ceil===Infinity?null:ceil,vis);
+    var wx=wxDecode(metar.wxString);
+    html+='<div class="slabel">Current conditions (METAR) — observed '+fmtZ(metar.reportTime||metar.obsTime)+'</div>';
+    html+='<div style="margin-bottom:10px"><span class="cat '+ct.toLowerCase()+'">'+ct+'</span></div>';
+    html+='<div class="metrics">'+mbox('Wind',windStr(metar.wdir,metar.wspd,metar.wgst),'')+mbox('Visibility',vis==null?'—':String(vis),vis==null?'':'mi')+mbox('Ceiling',ceil===Infinity?'None':String(ceil.toLocaleString()),ceil===Infinity?'':'ft')+mbox('Temp',metar.temp==null?'—':String(Math.round(metar.temp)),metar.temp==null?'':'°C')+'</div>';
+    if(wx.length)html+='<div class="wtags">'+wx.map(function(w){return'<span class="wtag'+(w.severe?' risk':'')+'">'+esc(w.label)+'</span>';}).join('')+'</div>';
+    if(metar.rawOb)html+='<div class="raw">'+esc(metar.rawOb)+'</div>';
   }
-  html+=`<div class="slabel">Forecast (TAF)${taf?.rawTAF?` \u2014 issued ${fmtZ(taf.issueTime)}`:''}</div>`;
-  if(!periods.length)html+='<div class="err">No TAF published for this station. Not all airports issue a TAF.</div>';
-  else{
-    html+=`<div class="fcards">${periods.map(fcard).join('')}</div>`;
-    if(taf?.rawTAF)html+=`<div class="raw" style="margin-top:14px">${esc(taf.rawTAF)}</div>`;
-  }
+  html+='<div class="slabel">Forecast (TAF)'+(taf&&taf.rawTAF?' — issued '+fmtZ(taf.issueTime):'')+'</div>';
+  if(!periods.length)html+='<div class="err-box">No TAF published for this station.</div>';
+  else{html+='<div class="fcards">'+periods.map(fcard).join('')+'</div>';if(taf&&taf.rawTAF)html+='<div class="raw" style="margin-top:14px">'+esc(taf.rawTAF)+'</div>';}
   out.innerHTML=html;
 }
 </script>
