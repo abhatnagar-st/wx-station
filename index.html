@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Station Weather &amp; Disruption Outlook</title>
+<style>
+  :root {
+    --text: #2C2C2B;
+    --text-2: #7D7A75;
+    --canvas: #FFFFFF;
+    --soft: #F9F8F7;
+    --surface-2: #F0EFED;
+    --border: #E6E5E3;
+    --blue: #2783DE;  --blue-soft: #E5F2FC;
+    --green: #46A171; --green-soft: #E8F1EC;
+    --orange: #D5803B;--orange-soft: #FBEBDE;
+    --red: #E56458;   --red-soft: #FCE9E7;
+    --radius: 12px;
+    --shadow: 0 1px 2px rgba(0,0,0,.05), 0 4px 12px rgba(0,0,0,.04);
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: Menlo, Consolas, "SF Mono", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --text: #FFFFFF;
+      --text-2: rgba(255,255,255,.65);
+      --canvas: #191919;
+      --soft: #202020;
+      --surface-2: #383836;
+      --border: rgba(255,255,255,.20);
+      --blue: #5E9FE8;  --blue-soft: rgba(94,159,232,.12);
+      --green: #72BC8F; --green-soft: rgba(114,188,143,.12);
+      --orange: #DE9255;--orange-soft: rgba(222,146,85,.12);
+      --red: #E97366;   --red-soft: rgba(233,115,102,.12);
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 12px rgba(0,0,0,.3);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--text);
+    background: var(--canvas);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 32px 24px 64px; }
+  header.top { margin-bottom: 24px; }
+  h1 { font-size: 30px; line-height: 1.2; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .sub { color: var(--text-2); font-size: 15px; margin: 0; max-width: 640px; }
+
+  .searchbar {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    background: var(--soft); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px; margin: 24px 0 8px;
+  }
+  .field { flex: 1 1 260px; display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 13px; color: var(--text-2); font-weight: 600; }
+  .field input {
+    font-family: var(--sans); font-size: 16px; color: var(--text);
+    background: var(--canvas); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 14px; min-height: 44px;
+    text-transform: uppercase;
+  }
+  .field input::placeholder { text-transform: none; color: var(--text-2); }
+  .field input:focus { outline: 2px solid var(--blue); outline-offset: 1px; border-color: var(--blue); }
+  button.go {
+    align-self: flex-end; min-height: 44px; padding: 0 22px;
+    font-family: var(--sans); font-size: 15px; font-weight: 600;
+    color: #fff; background: var(--blue); border: none;
+    border-radius: 8px; cursor: pointer;
+  }
+  button.go:hover { filter: brightness(.96); }
+  button.go:disabled { opacity: .55; cursor: default; }
+  .hint { font-size: 13px; color: var(--text-2); margin: 4px 2px 0; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .chip {
+    font-size: 13px; padding: 5px 11px; border-radius: 999px;
+    background: var(--surface-2); border: 1px solid var(--border);
+    color: var(--text); cursor: pointer;
+  }
+  .chip:hover { border-color: var(--blue); color: var(--blue); }
+
+  /* status / states */
+  .state { text-align: center; padding: 48px 16px; color: var(--text-2); }
+  .spinner {
+    width: 30px; height: 30px; border: 3px solid var(--border);
+    border-top-color: var(--blue); border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin: 0 auto 14px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .banner-err {
+    background: var(--red-soft); border: 1px solid var(--red);
+    color: var(--text); border-radius: var(--radius);
+    padding: 14px 16px; margin-top: 16px; font-size: 14px;
+  }
+
+  /* overall assessment banner */
+  .assess {
+    border-radius: var(--radius); padding: 18px 20px; margin: 24px 0 8px;
+    display: flex; gap: 16px; align-items: flex-start;
+    border: 1px solid var(--border); box-shadow: var(--shadow);
+  }
+  .assess .icon { font-size: 26px; line-height: 1; }
+  .assess h2 { margin: 0 0 4px; font-size: 18px; }
+  .assess p { margin: 0; font-size: 14px; color: var(--text-2); }
+  .assess.low   { background: var(--green-soft); border-color: var(--green); }
+  .assess.med   { background: var(--orange-soft); border-color: var(--orange); }
+  .assess.high  { background: var(--red-soft); border-color: var(--red); }
+
+  .station-name { margin: 20px 0 4px; font-size: 20px; }
+  .station-meta { color: var(--text-2); font-size: 14px; margin: 0 0 8px; }
+
+  .section-label {
+    font-size: 13px; font-weight: 700; letter-spacing: .04em;
+    text-transform: uppercase; color: var(--text-2);
+    margin: 28px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+
+  /* current conditions */
+  .metrics {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px; margin-bottom: 12px;
+  }
+  .metric {
+    background: var(--soft); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 16px;
+  }
+  .metric .k { font-size: 12px; color: var(--text-2); text-transform: uppercase; letter-spacing: .03em; }
+  .metric .v { font-size: 22px; font-weight: 650; margin-top: 4px; }
+  .metric .u { font-size: 13px; color: var(--text-2); font-weight: 400; }
+
+  .raw {
+    font-family: var(--mono); font-size: 13px; color: var(--text);
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 12px; margin-top: 4px;
+    overflow-x: auto; white-space: pre-wrap; word-break: break-word;
+  }
+
+  /* forecast cards */
+  .fcards { display: flex; flex-direction: column; gap: 14px; }
+  .fcard {
+    border: 1px solid var(--border); border-left-width: 5px;
+    border-radius: var(--radius); background: var(--canvas);
+    padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  .fcard.vfr  { border-left-color: var(--green); }
+  .fcard.mvfr { border-left-color: var(--blue); }
+  .fcard.ifr  { border-left-color: var(--orange); }
+  .fcard.lifr { border-left-color: var(--red); }
+  .fcard-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+  .fcard-time { font-weight: 650; font-size: 15px; }
+  .fcard-time small { display:block; font-weight: 400; color: var(--text-2); font-size: 12px; margin-top: 2px; }
+  .cat {
+    font-size: 12px; font-weight: 700; letter-spacing: .04em;
+    padding: 4px 10px; border-radius: 999px; white-space: nowrap;
+  }
+  .cat.vfr  { background: var(--green-soft); color: var(--green); }
+  .cat.mvfr { background: var(--blue-soft); color: var(--blue); }
+  .cat.ifr  { background: var(--orange-soft); color: var(--orange); }
+  .cat.lifr { background: var(--red-soft); color: var(--red); }
+  .fgrid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px 16px; font-size: 14px; margin-bottom: 10px;
+  }
+  .fgrid .k { color: var(--text-2); font-size: 12px; text-transform: uppercase; letter-spacing: .02em; }
+  .fgrid .v { font-weight: 600; margin-top: 1px; }
+  .action {
+    display: flex; gap: 10px; align-items: flex-start;
+    background: var(--soft); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 12px; font-size: 14px;
+  }
+  .action .a-ic { font-size: 15px; line-height: 1.4; }
+  .action .a-tx b { color: var(--text); }
+  .wx-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .wx-tag {
+    font-size: 12px; padding: 3px 9px; border-radius: 6px;
+    background: var(--surface-2); border: 1px solid var(--border); color: var(--text);
+  }
+  .wx-tag.warn { background: var(--orange-soft); border-color: var(--orange); color: var(--orange); }
+  .wx-tag.risk { background: var(--red-soft); border-color: var(--red); color: var(--red); }
+
+  footer.legend { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 13px; color: var(--text-2); }
+  .legend .row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px; }
+  .legend .item { display: flex; align-items: center; gap: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .dot.vfr{background:var(--green)} .dot.mvfr{background:var(--blue)} .dot.ifr{background:var(--orange)} .dot.lifr{background:var(--red)}
+
+  @media (max-width: 480px) {
+    .wrap { padding: 24px 16px 48px; }
+    h1 { font-size: 24px; }
+    button.go { flex: 1 1 100%; align-self: stretch; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Station Weather &amp; Disruption Outlook</h1>
+    <p class="sub">Enter an airport ICAO code to pull live observations (METAR) and the terminal forecast (TAF) from aviationweather.gov, translated into action blocks for disruption decisions.</p>
+  </header>
+
+  <div class="searchbar">
+    <div class="field">
+      <label for="apt">Airport (ICAO code)</label>
+      <input id="apt" placeholder="e.g. CYTZ, KJFK, EGLL" autocomplete="off" maxlength="4" />
+    </div>
+    <button class="go" id="go">Get forecast</button>
+  </div>
+  <p class="hint">Use the 4-letter ICAO code (Toronto City = CYTZ, JFK = KJFK). Quick picks:</p>
+  <div class="chips" id="chips"></div>
+
+  <div id="out"></div>
+
+  <footer class="legend">
+    <strong>Flight category legend</strong> — derived from ceiling &amp; visibility (FAA thresholds):
+    <div class="row">
+      <span class="item"><span class="dot vfr"></span> VFR &middot; ceiling &gt;3000 ft &amp; vis &gt;5 mi</span>
+      <span class="item"><span class="dot mvfr"></span> MVFR &middot; 1000–3000 ft or 3–5 mi</span>
+      <span class="item"><span class="dot ifr"></span> IFR &middot; 500–1000 ft or 1–3 mi</span>
+      <span class="item"><span class="dot lifr"></span> LIFR &middot; &lt;500 ft or &lt;1 mi</span>
+    </div>
+    <p style="margin-top:12px">Data source: NOAA/NWS Aviation Weather Center Data API (aviationweather.gov). METAR updates ~hourly (plus SPECI); TAF updates every 6 hours (plus amendments).</p>
+  </footer>
+</div>
+
+<script>
+const API = "https://aviationweather.gov/api/data";
+const QUICK = [
+  ["CYTZ","Toronto City"],["CYYZ","Toronto Pearson"],["KJFK","New York JFK"],
+  ["KBOS","Boston"],["KORD","Chicago O'Hare"],["EGLL","London Heathrow"]
+];
+
+const out = document.getElementById("out");
+const input = document.getElementById("apt");
+const goBtn = document.getElementById("go");
+const chipWrap = document.getElementById("chips");
+
+QUICK.forEach(([code,name]) => {
+  const c = document.createElement("button");
+  c.className = "chip"; c.textContent = code + " · " + name;
+  c.onclick = () => { input.value = code; run(); };
+  chipWrap.appendChild(c);
+});
+
+goBtn.onclick = run;
+input.addEventListener("keydown", e => { if (e.key === "Enter") run(); });
+
+// ---------- helpers ----------
+function esc(s){ return String(s==null?"":s).replace(/[&<>]/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m])); }
+
+// ceiling = lowest BKN/OVC/VV cloud base (ft). returns Infinity if none.
+function ceilingFt(clouds){
+  if(!clouds || !clouds.length) return Infinity;
+  let c = Infinity;
+  clouds.forEach(cl => {
+    const cover = (cl.cover||"").toUpperCase();
+    if(["BKN","OVC","OVX","VV"].includes(cover) && cl.base!=null) c = Math.min(c, cl.base);
+  });
+  return c;
+}
+// visibility to statute miles (API gives miles, sometimes "6+")
+function visMi(v){
+  if(v==null) return null;
+  if(typeof v==="string"){ const n=parseFloat(v.replace("+","")); return isNaN(n)?null:n; }
+  return v;
+}
+function category(ceil, vis){
+  const v = vis==null ? 99 : vis;
+  const c = ceil==null ? Infinity : ceil;
+  if(c<500 || v<1) return "LIFR";
+  if(c<1000 || v<3) return "IFR";
+  if(c<=3000 || v<=5) return "MVFR";
+  return "VFR";
+}
+const WX = {
+  TS:"Thunderstorm", TSRA:"Thunderstorm + rain", RA:"Rain", SHRA:"Rain showers",
+  SN:"Snow", SHSN:"Snow showers", FZRA:"Freezing rain", FZDZ:"Freezing drizzle",
+  FG:"Fog", BR:"Mist", HZ:"Haze", FU:"Smoke", GR:"Hail", GS:"Small hail",
+  DZ:"Drizzle", PL:"Ice pellets", BLSN:"Blowing snow", SQ:"Squall", FC:"Funnel cloud",
+  IC:"Ice crystals", UP:"Unknown precip", VCTS:"Thunderstorm nearby", VCSH:"Showers nearby"
+};
+function wxDecode(str){
+  if(!str) return [];
+  return str.trim().split(/\s+/).map(tok=>{
+    const clean = tok.replace(/^[+-]/,"").toUpperCase();
+    const intensity = tok.startsWith("+")?"Heavy ":tok.startsWith("-")?"Light ":"";
+    const base = WX[clean] || WX[clean.slice(0,2)] || clean;
+    const severe = /TS|FZ|GR|SQ|FC|\+SN|\+RA|BLSN|PL/.test(tok.toUpperCase());
+    return { label: intensity + base, severe };
+  });
+}
+function fmtZ(iso){
+  if(!iso) return "";
+  const d = new Date(iso);
+  if(isNaN(d)) return esc(iso);
+  return d.toLocaleString(undefined,{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
+}
+function windTxt(dir,spd,gst){
+  if(spd==null) return "—";
+  let t = (dir==null||dir===0?"Variable":dir+"°") + " @ " + spd + " kt";
+  if(gst) t += " G" + gst;
+  return t;
+}
+
+// action guidance per category / hazards
+function actionFor(cat, wind, gust, wxItems){
+  const hazards = wxItems.filter(w=>w.severe).map(w=>w.label);
+  const highWind = (gust && gust>=30) || (wind && wind>=25);
+  if(cat==="LIFR"){
+    return {cls:"high", ic:"🔴", txt:"<b>High disruption risk.</b> Near-minimums conditions — expect approach delays, diversions and possible ground stops. Pre-position recovery options and review OA rebooking capacity."};
+  }
+  if(cat==="IFR"){
+    return {cls:"high", ic:"🟠", txt:"<b>Elevated risk.</b> IFR conditions likely to slow arrival/departure rates. Build schedule buffer and watch for holding/flow programs."};
+  }
+  if(highWind || hazards.length){
+    const list = [];
+    if(hazards.length) list.push(hazards.join(", "));
+    if(highWind) list.push("strong winds/gusts");
+    return {cls:"med", ic:"🟡", txt:"<b>Monitor.</b> "+list.join(" and ")+" may cause intermittent delays. Keep an eye on amendments and de-ice / runway-config impacts."};
+  }
+  if(cat==="MVFR"){
+    return {cls:"med", ic:"🟡", txt:"<b>Marginal.</b> Generally operable but watch trend — conditions could tip into IFR. No action needed yet."};
+  }
+  return {cls:"low", ic:"🟢", txt:"<b>No weather constraint.</b> VFR conditions — no weather-driven disruption expected for this period."};
+}
+function rank(cat){ return {VFR:0,MVFR:1,IFR:2,LIFR:3}[cat]||0; }
+
+// ---------- render ----------
+async function run(){
+  const id = input.value.trim().toUpperCase();
+  if(!id){ input.focus(); return; }
+  goBtn.disabled = true;
+  out.innerHTML = '<div class="state"><div class="spinner"></div>Fetching live data for '+esc(id)+'…</div>';
+  try {
+    const [mRes, tRes] = await Promise.all([
+      fetch(`${API}/metar?ids=${encodeURIComponent(id)}&format=json`),
+      fetch(`${API}/taf?ids=${encodeURIComponent(id)}&format=json`)
+    ]);
+    const metar = await mRes.json();
+    const taf = await tRes.json();
+    render(id, Array.isArray(metar)?metar[0]:null, Array.isArray(taf)?taf[0]:null);
+  } catch (err) {
+    out.innerHTML = '<div class="banner-err"><b>Could not reach aviationweather.gov.</b><br>'+
+      'This is usually a network or browser CORS restriction when the page is opened directly from a file. '+
+      'Host it on a small server (or proxy the API) and it will load live data. Technical detail: '+esc(err.message)+'</div>';
+  } finally {
+    goBtn.disabled = false;
+  }
+}
+
+function render(id, metar, taf){
+  if(!metar && !taf){
+    out.innerHTML = '<div class="banner-err"><b>No data found for "'+esc(id)+'".</b> Check the ICAO code (it must be the 4-letter code, e.g. CYTZ, not YTZ or the city name).</div>';
+    return;
+  }
+  const name = (metar && metar.name) || (taf && taf.name) || id;
+  let html = "";
+
+  // ---- overall assessment from worst forecast period + current ----
+  const periods = buildPeriods(taf);
+  let worst = "VFR";
+  periods.forEach(p => { if(rank(p.cat) > rank(worst)) worst = p.cat; });
+  if(metar && metar.fltCat && rank(metar.fltCat) > rank(worst)) worst = metar.fltCat;
+  const overall = actionFor(worst, null, null, []);
+  html += `<div class="assess ${overall.cls}">
+    <div class="icon">${overall.ic}</div>
+    <div><h2>${esc(name)} — outlook: ${worst}</h2>
+    <p>Worst expected flight category across the current observation and forecast window. ${worst==='VFR'?'No weather-driven disruption anticipated.': worst==='MVFR'?'Marginal — monitor for changes.':'Weather likely to impact operations — plan recovery options.'}</p></div>
+  </div>`;
+
+  html += `<h3 class="station-name">${esc(name)} <span style="color:var(--text-2);font-weight:400">(${esc(id)})</span></h3>`;
+
+  // ---- current conditions ----
+  if(metar){
+    const ceil = ceilingFt(metar.clouds);
+    const vis = visMi(metar.visib);
+    const cat = metar.fltCat || category(ceil===Infinity?null:ceil, vis);
+    const wx = wxDecode(metar.wxString);
+    html += `<div class="section-label">Current conditions (METAR) — observed ${fmtZ(metar.reportTime||metar.obsTime)}</div>`;
+    html += `<div style="margin-bottom:10px"><span class="cat ${cat.toLowerCase()}">${cat}</span></div>`;
+    html += `<div class="metrics">`;
+    html += metricBox("Wind", windTxt(metar.wdir, metar.wspd, metar.wgst), "");
+    html += metricBox("Visibility", vis==null?"—":vis, vis==null?"":"mi");
+    html += metricBox("Ceiling", ceil===Infinity?"None":ceil.toLocaleString(), ceil===Infinity?"":"ft");
+    html += metricBox("Temp", metar.temp==null?"—":Math.round(metar.temp), metar.temp==null?"":"°C");
+    html += `</div>`;
+    if(wx.length){
+      html += `<div class="wx-tags">` + wx.map(w=>`<span class="wx-tag ${w.severe?'risk':''}">${esc(w.label)}</span>`).join("") + `</div>`;
+    }
+    if(metar.rawOb) html += `<div class="raw">${esc(metar.rawOb)}</div>`;
+  }
+
+  // ---- forecast periods ----
+  html += `<div class="section-label">Forecast (TAF)${taf&&taf.rawTAF?` — issued ${fmtZ(taf.issueTime)}`:''}</div>`;
+  if(!periods.length){
+    html += `<div class="banner-err">No TAF forecast is published for this station. Not all airports issue a TAF — use the current METAR above, or check a larger nearby airport.</div>`;
+  } else {
+    html += `<div class="fcards">`;
+    periods.forEach(p => { html += forecastCard(p); });
+    html += `</div>`;
+    if(taf && taf.rawTAF) html += `<div class="raw" style="margin-top:14px">${esc(taf.rawTAF)}</div>`;
+  }
+
+  out.innerHTML = html;
+}
+
+function metricBox(k,v,u){
+  return `<div class="metric"><div class="k">${esc(k)}</div><div class="v">${esc(v)} <span class="u">${esc(u)}</span></div></div>`;
+}
+
+function buildPeriods(taf){
+  if(!taf || !Array.isArray(taf.fcsts)) return [];
+  return taf.fcsts.map(f => {
+    const ceil = ceilingFt(f.clouds);
+    const vis = visMi(f.visib);
+    const cat = category(ceil===Infinity?null:ceil, vis);
+    const wx = wxDecode(f.wxString);
+    return {
+      from: f.timeFrom ? new Date(f.timeFrom*1000).toISOString() : (f.timeBec||null),
+      to: f.timeTo ? new Date(f.timeTo*1000).toISOString() : null,
+      change: f.fcstChange || null,
+      probability: f.probability || null,
+      cat, ceil, vis, wx,
+      wdir: f.wdir, wspd: f.wspd, wgst: f.wgst
+    };
+  });
+}
+
+function forecastCard(p){
+  const cls = p.cat.toLowerCase();
+  const act = actionFor(p.cat, p.wspd, p.wgst, p.wx);
+  const change = p.change ? `<span class="wx-tag">${esc(p.change)}${p.probability?` ${p.probability}%`:''}</span>` : "";
+  let head = fmtZ(p.from);
+  if(p.to) head += ` → ${fmtZ(p.to)}`;
+  let tags = p.wx.map(w=>`<span class="wx-tag ${w.severe?'risk':''}">${esc(w.label)}</span>`).join("");
+  if(change) tags = change + tags;
+  return `<div class="fcard ${cls}">
+    <div class="fcard-top">
+      <div class="fcard-time">${head}<small>Forecast period (times local)</small></div>
+      <span class="cat ${cls}">${p.cat}</span>
+    </div>
+    ${tags?`<div class="wx-tags">${tags}</div>`:""}
+    <div class="fgrid">
+      <div><div class="k">Wind</div><div class="v">${esc(windTxt(p.wdir,p.wspd,p.wgst))}</div></div>
+      <div><div class="k">Visibility</div><div class="v">${p.vis==null?"—":esc(p.vis)+" mi"}</div></div>
+      <div><div class="k">Ceiling</div><div class="v">${p.ceil===Infinity?"None":esc(p.ceil.toLocaleString())+" ft"}</div></div>
+    </div>
+    <div class="action"><span class="a-ic">${act.ic}</span><span class="a-tx">${act.txt}</span></div>
+  </div>`;
+}
+
+// Demo fallback: if opened offline (file://) with no network, show sample data so layout is visible.
+window.addEventListener("DOMContentLoaded", () => {
+  if (location.protocol === "file:" && window.__DEMO__ !== false) {
+    // no auto-run; user can still try live. Provide demo via ?demo
+  }
+  const params = new URLSearchParams(location.search);
+  if(params.get("demo")==="1"){ input.value = "CYTZ"; renderDemo(); }
+});
+
+function renderDemo(){
+  const now = Math.floor(Date.now()/1000);
+  const metar = { name:"Toronto/City Centre", icaoId:"CYTZ", fltCat:"MVFR", wdir:240, wspd:14, wgst:22,
+    visib:4, temp:6, dewp:3, wxString:"-RA BR", reportTime:new Date().toISOString(),
+    clouds:[{cover:"BKN",base:1500},{cover:"OVC",base:2500}],
+    rawOb:"CYTZ 271500Z 24014G22KT 4SM -RA BR BKN015 OVC025 06/03 A2978" };
+  const taf = { name:"Toronto/City Centre", icaoId:"CYTZ", issueTime:new Date().toISOString(),
+    rawTAF:"CYTZ 271140Z 2712/2812 24012KT 6SM -RA BKN020 TEMPO 2712/2716 2SM RA BR OVC008 FM272000 27018G28KT P6SM SCT040",
+    fcsts:[
+      {timeFrom:now, timeTo:now+4*3600, wdir:240, wspd:12, visib:6, wxString:"-RA", clouds:[{cover:"BKN",base:2000}]},
+      {timeFrom:now+4*3600, timeTo:now+8*3600, fcstChange:"TEMPO", probability:null, wdir:250, wspd:14, visib:2, wxString:"RA BR", clouds:[{cover:"OVC",base:800}]},
+      {timeFrom:now+8*3600, timeTo:now+20*3600, fcstChange:"FM", wdir:270, wspd:18, wgst:28, visib:6, wxString:"", clouds:[{cover:"SCT",base:4000}]}
+    ]};
+  render("CYTZ", metar, taf);
+}
+</script>
+</body>
+</html>
