@@ -5,106 +5,107 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Station Weather &amp; Disruption Outlook</title>
 <style>
-  :root {
-    --text: #2C2C2B; --text-2: #7D7A75;
-    --canvas: #FFFFFF; --soft: #F9F8F7;
-    --surface-2: #F0EFED; --border: #E6E5E3;
-    --blue: #2783DE; --blue-soft: #E5F2FC;
-    --green: #46A171; --green-soft: #E8F1EC;
-    --orange: #D5803B; --orange-soft: #FBEBDE;
-    --red: #E56458; --red-soft: #FCE9E7;
-    --radius: 12px;
-    --shadow: 0 1px 2px rgba(0,0,0,.05), 0 4px 12px rgba(0,0,0,.04);
-    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    --mono: Menlo, Consolas, "SF Mono", monospace;
+:root{
+  --text:#2C2C2B;--text-2:#7D7A75;--canvas:#fff;--soft:#F9F8F7;
+  --surface-2:#F0EFED;--border:#E6E5E3;
+  --blue:#2783DE;--blue-soft:#E5F2FC;
+  --green:#46A171;--green-soft:#E8F1EC;
+  --orange:#D5803B;--orange-soft:#FBEBDE;
+  --red:#E56458;--red-soft:#FCE9E7;
+  --r:12px;--sh:0 1px 2px rgba(0,0,0,.05),0 4px 12px rgba(0,0,0,.04);
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --mono:Menlo,Consolas,'SF Mono',monospace;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --text:#fff;--text-2:rgba(255,255,255,.65);
+    --canvas:#191919;--soft:#202020;--surface-2:#383836;
+    --border:rgba(255,255,255,.2);
+    --blue:#5E9FE8;--blue-soft:rgba(94,159,232,.12);
+    --green:#72BC8F;--green-soft:rgba(114,188,143,.12);
+    --orange:#DE9255;--orange-soft:rgba(222,146,85,.12);
+    --red:#E97366;--red-soft:rgba(233,115,102,.12);
+    --sh:0 1px 2px rgba(0,0,0,.4),0 4px 12px rgba(0,0,0,.3);
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --text:#fff; --text-2:rgba(255,255,255,.65);
-      --canvas:#191919; --soft:#202020; --surface-2:#383836;
-      --border:rgba(255,255,255,.20);
-      --blue:#5E9FE8; --blue-soft:rgba(94,159,232,.12);
-      --green:#72BC8F; --green-soft:rgba(114,188,143,.12);
-      --orange:#DE9255; --orange-soft:rgba(222,146,85,.12);
-      --red:#E97366; --red-soft:rgba(233,115,102,.12);
-      --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 12px rgba(0,0,0,.3);
-    }
-  }
-  *{box-sizing:border-box}
-  body{margin:0;font-family:var(--sans);font-size:16px;line-height:1.5;color:var(--text);background:var(--canvas);-webkit-font-smoothing:antialiased}
-  .wrap{max-width:1000px;margin:0 auto;padding:32px 24px 64px}
-  h1{font-size:30px;line-height:1.2;margin:0 0 6px;letter-spacing:-.01em}
-  .sub{color:var(--text-2);font-size:15px;margin:0;max-width:640px}
-  .searchbar{display:flex;gap:12px;flex-wrap:wrap;background:var(--soft);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin:24px 0 8px}
-  .field{flex:1 1 260px;display:flex;flex-direction:column;gap:6px}
-  .field label{font-size:13px;color:var(--text-2);font-weight:600}
-  .field input{font-family:var(--sans);font-size:16px;color:var(--text);background:var(--canvas);border:1px solid var(--border);border-radius:8px;padding:12px 14px;min-height:44px;text-transform:uppercase}
-  .field input::placeholder{text-transform:none;color:var(--text-2)}
-  .field input:focus{outline:2px solid var(--blue);outline-offset:1px;border-color:var(--blue)}
-  button.go{align-self:flex-end;min-height:44px;padding:0 22px;font-family:var(--sans);font-size:15px;font-weight:600;color:#fff;background:var(--blue);border:none;border-radius:8px;cursor:pointer}
-  button.go:hover{filter:brightness(.96)}
-  button.go:disabled{opacity:.55;cursor:default}
-  .hint{font-size:13px;color:var(--text-2);margin:4px 2px 0}
-  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-  .chip{font-size:13px;padding:5px 11px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);cursor:pointer}
-  .chip:hover{border-color:var(--blue);color:var(--blue)}
-  .state{text-align:center;padding:48px 16px;color:var(--text-2)}
-  .spinner{width:30px;height:30px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .banner-err{background:var(--red-soft);border:1px solid var(--red);color:var(--text);border-radius:var(--radius);padding:14px 16px;margin-top:16px;font-size:14px}
-  .assess{border-radius:var(--radius);padding:18px 20px;margin:24px 0 8px;display:flex;gap:16px;align-items:flex-start;border:1px solid var(--border);box-shadow:var(--shadow)}
-  .assess .icon{font-size:26px;line-height:1}
-  .assess h2{margin:0 0 4px;font-size:18px}
-  .assess p{margin:0;font-size:14px;color:var(--text-2)}
-  .assess.low{background:var(--green-soft);border-color:var(--green)}
-  .assess.med{background:var(--orange-soft);border-color:var(--orange)}
-  .assess.high{background:var(--red-soft);border-color:var(--red)}
-  .station-name{margin:20px 0 4px;font-size:20px}
-  .section-label{font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-2);margin:28px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
-  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:12px}
-  .metric{background:var(--soft);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
-  .metric .k{font-size:12px;color:var(--text-2);text-transform:uppercase;letter-spacing:.03em}
-  .metric .v{font-size:22px;font-weight:650;margin-top:4px}
-  .metric .u{font-size:13px;color:var(--text-2);font-weight:400}
-  .raw{font-family:var(--mono);font-size:13px;color:var(--text);background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:4px;overflow-x:auto;white-space:pre-wrap;word-break:break-word}
-  .fcards{display:flex;flex-direction:column;gap:14px}
-  .fcard{border:1px solid var(--border);border-left-width:5px;border-radius:var(--radius);background:var(--canvas);padding:16px 18px;box-shadow:var(--shadow)}
-  .fcard.vfr{border-left-color:var(--green)}
-  .fcard.mvfr{border-left-color:var(--blue)}
-  .fcard.ifr{border-left-color:var(--orange)}
-  .fcard.lifr{border-left-color:var(--red)}
-  .fcard-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
-  .fcard-time{font-weight:650;font-size:15px}
-  .fcard-time small{display:block;font-weight:400;color:var(--text-2);font-size:12px;margin-top:2px}
-  .cat{font-size:12px;font-weight:700;letter-spacing:.04em;padding:4px 10px;border-radius:999px;white-space:nowrap}
-  .cat.vfr{background:var(--green-soft);color:var(--green)}
-  .cat.mvfr{background:var(--blue-soft);color:var(--blue)}
-  .cat.ifr{background:var(--orange-soft);color:var(--orange)}
-  .cat.lifr{background:var(--red-soft);color:var(--red)}
-  .fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px 16px;font-size:14px;margin-bottom:10px}
-  .fgrid .k{color:var(--text-2);font-size:12px;text-transform:uppercase;letter-spacing:.02em}
-  .fgrid .v{font-weight:600;margin-top:1px}
-  .action{display:flex;gap:10px;align-items:flex-start;background:var(--soft);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px}
-  .a-ic{font-size:15px;line-height:1.4}
-  .wx-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
-  .wx-tag{font-size:12px;padding:3px 9px;border-radius:6px;background:var(--surface-2);border:1px solid var(--border);color:var(--text)}
-  .wx-tag.warn{background:var(--orange-soft);border-color:var(--orange);color:var(--orange)}
-  .wx-tag.risk{background:var(--red-soft);border-color:var(--red);color:var(--red)}
-  footer.legend{margin-top:32px;padding-top:16px;border-top:1px solid var(--border);font-size:13px;color:var(--text-2)}
-  .legend .row{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px}
-  .legend .item{display:flex;align-items:center;gap:6px}
-  .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
-  .dot.vfr{background:var(--green)} .dot.mvfr{background:var(--blue)} .dot.ifr{background:var(--orange)} .dot.lifr{background:var(--red)}
-  @media(max-width:480px){.wrap{padding:24px 16px 48px}h1{font-size:24px}button.go{flex:1 1 100%;align-self:stretch}}
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--sans);font-size:16px;line-height:1.5;color:var(--text);background:var(--canvas);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1000px;margin:0 auto;padding:32px 24px 64px}
+.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:4px}
+h1{font-size:30px;line-height:1.2;margin:0;letter-spacing:-.01em}
+.version-badge{font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--blue-soft);color:var(--blue);border:1px solid var(--blue);white-space:nowrap;align-self:flex-start;margin-top:6px}
+.sub{color:var(--text-2);font-size:15px;margin:4px 0 0}
+.sbar{display:flex;gap:12px;flex-wrap:wrap;background:var(--soft);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin:24px 0 8px}
+.field{flex:1 1 260px;display:flex;flex-direction:column;gap:6px}
+.field label{font-size:13px;color:var(--text-2);font-weight:600}
+.field input{font-family:var(--sans);font-size:16px;color:var(--text);background:var(--canvas);border:1px solid var(--border);border-radius:8px;padding:12px 14px;min-height:44px;text-transform:uppercase;outline:none}
+.field input::placeholder{text-transform:none;color:var(--text-2)}
+.field input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
+button.go{align-self:flex-end;min-height:44px;padding:0 22px;font-family:var(--sans);font-size:15px;font-weight:600;color:#fff;background:var(--blue);border:none;border-radius:8px;cursor:pointer}
+button.go:hover{filter:brightness(.94)}
+button.go:disabled{opacity:.5;cursor:default}
+.hint{font-size:13px;color:var(--text-2);margin:4px 2px 0}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.chip{font-size:13px;padding:5px 12px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);cursor:pointer}
+.chip:hover{border-color:var(--blue);color:var(--blue)}
+.state{text-align:center;padding:48px 16px;color:var(--text-2)}
+.spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err{background:var(--red-soft);border:1px solid var(--red);color:var(--text);border-radius:var(--r);padding:14px 16px;margin-top:16px;font-size:14px;line-height:1.6}
+.assess{border-radius:var(--r);padding:18px 20px;margin:24px 0 8px;display:flex;gap:16px;align-items:flex-start;border:1px solid var(--border);box-shadow:var(--sh)}
+.assess .ic{font-size:26px;line-height:1}
+.assess h2{margin:0 0 4px;font-size:18px}
+.assess p{margin:0;font-size:14px;color:var(--text-2)}
+.assess.low{background:var(--green-soft);border-color:var(--green)}
+.assess.med{background:var(--orange-soft);border-color:var(--orange)}
+.assess.high{background:var(--red-soft);border-color:var(--red)}
+.sn{margin:20px 0 0;font-size:20px}
+.slabel{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-2);margin:28px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:12px;margin-bottom:12px}
+.metric{background:var(--soft);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px}
+.metric .k{font-size:12px;color:var(--text-2);text-transform:uppercase;letter-spacing:.03em}
+.metric .v{font-size:22px;font-weight:650;margin-top:4px}
+.metric .u{font-size:13px;color:var(--text-2);font-weight:400}
+.raw{font-family:var(--mono);font-size:13px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:4px;overflow-x:auto;white-space:pre-wrap;word-break:break-word}
+.fcards{display:flex;flex-direction:column;gap:14px}
+.fcard{border:1px solid var(--border);border-left-width:5px;border-radius:var(--r);background:var(--canvas);padding:16px 18px;box-shadow:var(--sh)}
+.fcard.vfr{border-left-color:var(--green)}
+.fcard.mvfr{border-left-color:var(--blue)}
+.fcard.ifr{border-left-color:var(--orange)}
+.fcard.lifr{border-left-color:var(--red)}
+.fcard-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.ftime{font-weight:650;font-size:15px}
+.ftime small{display:block;font-weight:400;color:var(--text-2);font-size:12px;margin-top:2px}
+.cat{font-size:12px;font-weight:700;letter-spacing:.04em;padding:4px 10px;border-radius:999px;white-space:nowrap}
+.cat.vfr{background:var(--green-soft);color:var(--green)}
+.cat.mvfr{background:var(--blue-soft);color:var(--blue)}
+.cat.ifr{background:var(--orange-soft);color:var(--orange)}
+.cat.lifr{background:var(--red-soft);color:var(--red)}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px 16px;font-size:14px;margin-bottom:10px}
+.fgrid .k{color:var(--text-2);font-size:12px;text-transform:uppercase;letter-spacing:.02em}
+.fgrid .v{font-weight:600;margin-top:1px}
+.action{display:flex;gap:10px;align-items:flex-start;background:var(--soft);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px}
+.wx-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.wxt{font-size:12px;padding:3px 9px;border-radius:6px;background:var(--surface-2);border:1px solid var(--border)}
+.wxt.risk{background:var(--red-soft);border-color:var(--red);color:var(--red)}
+.wxt.warn{background:var(--orange-soft);border-color:var(--orange);color:var(--orange)}
+footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--border);font-size:13px;color:var(--text-2)}
+.leg-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px}
+.leg-item{display:flex;align-items:center;gap:6px}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.dot.vfr{background:var(--green)}.dot.mvfr{background:var(--blue)}.dot.ifr{background:var(--orange)}.dot.lifr{background:var(--red)}
+@media(max-width:480px){.wrap{padding:24px 16px 48px}h1{font-size:24px}button.go{flex:1 1 100%;align-self:stretch}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
+  <div class="topbar">
     <h1>Station Weather &amp; Disruption Outlook</h1>
-    <p class="sub">Enter an airport ICAO code to pull live observations (METAR) and the terminal forecast (TAF) from aviationweather.gov, translated into action blocks for disruption decisions.</p>
-  </header>
-  <div class="searchbar">
+    <span class="version-badge">v2.1 &mdash; Jul 27 2026</span>
+  </div>
+  <p class="sub">Enter an airport ICAO code to pull live observations (METAR) and the terminal forecast (TAF) from aviationweather.gov, translated into action blocks for disruption decisions.</p>
+
+  <div class="sbar">
     <div class="field">
       <label for="apt">Airport (ICAO code)</label>
       <input id="apt" placeholder="e.g. CYTZ, KJFK, EGLL" autocomplete="off" maxlength="4" />
@@ -114,167 +115,169 @@
   <p class="hint">Use the 4-letter ICAO code (Toronto City = CYTZ, JFK = KJFK). Quick picks:</p>
   <div class="chips" id="chips"></div>
   <div id="out"></div>
-  <footer class="legend">
-    <strong>Flight category legend</strong> &mdash; derived from ceiling &amp; visibility (FAA thresholds):
-    <div class="row">
-      <span class="item"><span class="dot vfr"></span> VFR &middot; ceiling &gt;3000 ft &amp; vis &gt;5 mi</span>
-      <span class="item"><span class="dot mvfr"></span> MVFR &middot; 1000&ndash;3000 ft or 3&ndash;5 mi</span>
-      <span class="item"><span class="dot ifr"></span> IFR &middot; 500&ndash;1000 ft or 1&ndash;3 mi</span>
-      <span class="item"><span class="dot lifr"></span> LIFR &middot; &lt;500 ft or &lt;1 mi</span>
+
+  <footer>
+    <strong>Flight category legend</strong> &mdash; derived from ceiling &amp; visibility:
+    <div class="leg-row">
+      <span class="leg-item"><span class="dot vfr"></span> VFR &middot; ceiling &gt;3000 ft &amp; vis &gt;5 mi</span>
+      <span class="leg-item"><span class="dot mvfr"></span> MVFR &middot; 1000&ndash;3000 ft or 3&ndash;5 mi</span>
+      <span class="leg-item"><span class="dot ifr"></span> IFR &middot; 500&ndash;1000 ft or 1&ndash;3 mi</span>
+      <span class="leg-item"><span class="dot lifr"></span> LIFR &middot; &lt;500 ft or &lt;1 mi</span>
     </div>
-    <p style="margin-top:12px">Data: NOAA/NWS Aviation Weather Center (aviationweather.gov) via corsproxy.io. METAR ~hourly + SPECI; TAF every 6 h + amendments.</p>
+    <p style="margin-top:10px">Data: NOAA/NWS Aviation Weather Center (aviationweather.gov). METAR ~hourly + SPECI; TAF every 6 h + amendments.</p>
   </footer>
 </div>
+
 <script>
-const PROXY = "https://corsproxy.io/?url=";
-const API   = "https://aviationweather.gov/api/data";
-const QUICK = [
-  ["CYTZ","Toronto City"],["CYYZ","Toronto Pearson"],["KJFK","New York JFK"],
-  ["KBOS","Boston"],["KORD","Chicago O'Hare"],["EGLL","London Heathrow"]
+const VERSION = 'v2.1 — Jul 27 2026';
+const API = 'https://aviationweather.gov/api/data';
+
+// Ordered list of CORS proxy strategies to try
+  url => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url),
+  url => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url),
+  url => 'https://corsproxy.io/?url=' + encodeURIComponent(url),
+  url => url
 ];
-const out = document.getElementById("out");
-const input = document.getElementById("apt");
-const goBtn = document.getElementById("go");
+
+const QUICK = [
+  ['CYTZ','Toronto City'],['CYYZ','Toronto Pearson'],['KJFK','New York JFK'],
+  ['KBOS','Boston'],['KORD','Chicago O\'Hare'],['EGLL','London Heathrow']
+];
+
+const out  = document.getElementById('out');
+const input= document.getElementById('apt');
+const goBtn= document.getElementById('go');
+
 QUICK.forEach(([code,name])=>{
-  const c=document.createElement("button");
-  c.className="chip"; c.textContent=code+" \u00b7 "+name;
+  const c=document.createElement('button');
+  c.className='chip';c.textContent=`${code} \u00b7 ${name}`;
   c.onclick=()=>{input.value=code;run();};
-  document.getElementById("chips").appendChild(c);
+  document.getElementById('chips').appendChild(c);
 });
 goBtn.onclick=run;
-input.addEventListener("keydown",e=>{if(e.key==="Enter")run();});
+input.addEventListener('keydown',e=>{if(e.key==='Enter')run();});
 
-function esc(s){return String(s==null?"":s).replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]));}
-function ceilingFt(clouds){
-  if(!clouds||!clouds.length)return Infinity;
-  let c=Infinity;
-  clouds.forEach(cl=>{const cv=(cl.cover||"").toUpperCase();if(["BKN","OVC","OVX","VV"].includes(cv)&&cl.base!=null)c=Math.min(c,cl.base);});
-  return c;
-}
-function visMi(v){
-  if(v==null)return null;
-  if(typeof v==="string"){const n=parseFloat(v.replace("+",""));return isNaN(n)?null:n;}
-  return v;
-}
-function category(ceil,vis){
-  const v=vis==null?99:vis,c=ceil==null?Infinity:ceil;
-  if(c<500||v<1)return"LIFR";
-  if(c<1000||v<3)return"IFR";
-  if(c<=3000||v<=5)return"MVFR";
-  return"VFR";
-}
-const WX={TS:"Thunderstorm",TSRA:"Thunderstorm+Rain",RA:"Rain",SHRA:"Rain showers",SN:"Snow",SHSN:"Snow showers",FZRA:"Freezing rain",FZDZ:"Freezing drizzle",FG:"Fog",BR:"Mist",HZ:"Haze",FU:"Smoke",GR:"Hail",GS:"Small hail",DZ:"Drizzle",PL:"Ice pellets",BLSN:"Blowing snow",SQ:"Squall",FC:"Funnel cloud",VCTS:"Thunderstorm nearby",VCSH:"Showers nearby"};
-function wxDecode(str){
-  if(!str)return[];
-  return str.trim().split(/\s+/).map(tok=>{
-    const clean=tok.replace(/^[+-]/,"").toUpperCase();
-    const int=tok.startsWith("+")?"Heavy ":tok.startsWith("-")?"Light ":"";
-    const base=WX[clean]||WX[clean.slice(0,2)]||clean;
-    const severe=/TS|FZ|GR|SQ|FC|\+SN|\+RA|BLSN|PL/.test(tok.toUpperCase());
-    return{label:int+base,severe};
-  });
-}
-function fmtZ(iso){
-  if(!iso)return"";
-  const d=new Date(iso);
-  return isNaN(d)?esc(iso):d.toLocaleString(undefined,{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
-}
-function windTxt(dir,spd,gst){
-  if(spd==null)return"\u2014";
-  let t=(dir==null||dir===0?"Variable":dir+"\u00b0")+" @ "+spd+" kt";
-  if(gst)t+=" G"+gst;
-  return t;
-}
-function actionFor(cat,wind,gust,wxItems){
-  const hazards=wxItems.filter(w=>w.severe).map(w=>w.label);
-  const highWind=(gust&&gust>=30)||(wind&&wind>=25);
-  if(cat==="LIFR")return{cls:"high",ic:"\ud83d\udd34",txt:"<b>High disruption risk.</b> Near-minimums \u2014 expect delays, diversions and possible ground stops. Pre-position recovery options and review OA rebooking capacity."};
-  if(cat==="IFR")return{cls:"high",ic:"\ud83d\udfe0",txt:"<b>Elevated risk.</b> IFR conditions likely to slow arrival/departure rates. Build schedule buffer and watch for holding/flow programs."};
-  if(highWind||hazards.length){
-    const list=[];
-    if(hazards.length)list.push(hazards.join(", "));
-    if(highWind)list.push("strong winds/gusts");
-    return{cls:"med",ic:"\ud83d\udfe1",txt:"<b>Monitor.</b> "+list.join(" and ")+" may cause intermittent delays. Watch amendments and de-ice/runway-config impacts."};
+function esc(s){return String(s??'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));}
+
+async function fetchWithFallback(url){
+  let lastErr;
+  for(const proxy of PROXIES){
+    try{
+      const r=await fetch(proxy(url),{signal:AbortSignal.timeout(8000)});
+      if(!r.ok)throw new Error(`HTTP ${r.status}`);
+      const txt=await r.text();
+      return JSON.parse(txt);
+    }catch(e){lastErr=e;}
   }
-  if(cat==="MVFR")return{cls:"med",ic:"\ud83d\udfe1",txt:"<b>Marginal.</b> Generally operable \u2014 watch trend, could tip into IFR. No action needed yet."};
-  return{cls:"low",ic:"\ud83d\udfe2",txt:"<b>No weather constraint.</b> VFR conditions \u2014 no weather-driven disruption expected."};
+  throw lastErr||new Error('All proxies failed');
 }
-function rank(cat){return{VFR:0,MVFR:1,IFR:2,LIFR:3}[cat]||0;}
 
 async function run(){
   const id=input.value.trim().toUpperCase();
   if(!id){input.focus();return;}
   goBtn.disabled=true;
-  out.innerHTML='<div class="state"><div class="spinner"></div>Fetching live data for '+esc(id)+'\u2026</div>';
+  out.innerHTML=`<div class="state"><div class="spinner"></div>Fetching live data for ${esc(id)}…</div>`;
   try{
-    const mUrl=encodeURIComponent(`${API}/metar?ids=${encodeURIComponent(id)}&format=json`);
-    const tUrl=encodeURIComponent(`${API}/taf?ids=${encodeURIComponent(id)}&format=json`);
-    const [mRes,tRes]=await Promise.all([
-      fetch(PROXY+mUrl),
-      fetch(PROXY+tUrl)
+    const [metar,taf]=await Promise.all([
+      fetchWithFallback(`${API}/metar?ids=${encodeURIComponent(id)}&format=json`),
+      fetchWithFallback(`${API}/taf?ids=${encodeURIComponent(id)}&format=json`)
     ]);
-    const metar=await mRes.json();
-    const taf=await tRes.json();
     render(id,Array.isArray(metar)?metar[0]:null,Array.isArray(taf)?taf[0]:null);
-  }catch(err){
-    out.innerHTML='<div class="banner-err"><b>Could not fetch data.</b><br>Error: '+esc(err.message)+'<br><br>Try refreshing or check your internet connection. If the problem persists the CORS proxy (corsproxy.io) may be temporarily unavailable.</div>';
-  }finally{
-    goBtn.disabled=false;
-  }
+  }catch(e){
+    out.innerHTML=`<div class="err"><b>Could not fetch data after trying multiple sources.</b><br>Error: ${esc(e.message)}<br><br>Check your internet connection and try again. If the issue persists the weather API or all proxies may be temporarily unavailable.</div>`;
+  }finally{goBtn.disabled=false;}
 }
 
-function render(id,metar,taf){
-  if(!metar&&!taf){
-    out.innerHTML='<div class="banner-err"><b>No data found for \"'+esc(id)+'\".</b> Check the ICAO code \u2014 must be 4 letters (e.g. CYTZ, not YTZ or the city name).</div>';
-    return;
-  }
-  const name=(metar&&metar.name)||(taf&&taf.name)||id;
-  const periods=buildPeriods(taf);
-  let worst="VFR";
-  periods.forEach(p=>{if(rank(p.cat)>rank(worst))worst=p.cat;});
-  if(metar&&metar.fltCat&&rank(metar.fltCat)>rank(worst))worst=metar.fltCat;
-  const overall=actionFor(worst,null,null,[]);
-  let html=`<div class="assess ${overall.cls}"><div class="icon">${overall.ic}</div><div><h2>${esc(name)} \u2014 outlook: ${worst}</h2><p>Worst expected category across current obs &amp; forecast window. ${worst==="VFR"?"No weather-driven disruption anticipated.":worst==="MVFR"?"Marginal \u2014 monitor for changes.":"Weather likely to impact operations \u2014 plan recovery options."}</p></div></div>`;
-  html+=`<h3 class="station-name">${esc(name)} <span style="color:var(--text-2);font-weight:400">(${esc(id)})</span></h3>`;
-  if(metar){
-    const ceil=ceilingFt(metar.clouds);
-    const vis=visMi(metar.visib);
-    const cat=metar.fltCat||category(ceil===Infinity?null:ceil,vis);
-    const wx=wxDecode(metar.wxString);
-    html+=`<div class="section-label">Current conditions (METAR) \u2014 observed ${fmtZ(metar.reportTime||metar.obsTime)}</div>`;
-    html+=`<div style="margin-bottom:10px"><span class="cat ${cat.toLowerCase()}">${cat}</span></div>`;
-    html+=`<div class="metrics">${metricBox("Wind",windTxt(metar.wdir,metar.wspd,metar.wgst),"")}${metricBox("Visibility",vis==null?"\u2014":vis,vis==null?"":"mi")}${metricBox("Ceiling",ceil===Infinity?"None":ceil.toLocaleString(),ceil===Infinity?"":"ft")}${metricBox("Temp",metar.temp==null?"\u2014":Math.round(metar.temp),metar.temp==null?"":"\u00b0C")}</div>`;
-    if(wx.length)html+=`<div class="wx-tags">${wx.map(w=>`<span class="wx-tag ${w.severe?"risk":""} ">${esc(w.label)}</span>`).join("")}</div>`;
-    if(metar.rawOb)html+=`<div class="raw">${esc(metar.rawOb)}</div>`;
-  }
-  html+=`<div class="section-label">Forecast (TAF)${taf&&taf.rawTAF?` \u2014 issued ${fmtZ(taf.issueTime)}`:""}</div>`;
-  if(!periods.length){
-    html+='<div class="banner-err">No TAF published for this station. Not all airports issue a TAF \u2014 check a larger nearby airport.</div>';
-  }else{
-    html+=`<div class="fcards">${periods.map(forecastCard).join("")}</div>`;
-    if(taf&&taf.rawTAF)html+=`<div class="raw" style="margin-top:14px">${esc(taf.rawTAF)}</div>`;
-  }
-  out.innerHTML=html;
+function ceilingFt(clouds){
+  if(!clouds?.length)return Infinity;
+  let c=Infinity;
+  clouds.forEach(cl=>{if(['BKN','OVC','OVX','VV'].includes((cl.cover||'').toUpperCase())&&cl.base!=null)c=Math.min(c,cl.base);});
+  return c;
 }
+function visMi(v){if(v==null)return null;if(typeof v==='string'){const n=parseFloat(v.replace('+',''));return isNaN(n)?null:n;}return v;}
+function category(ceil,vis){
+  const v=vis??99,c=ceil??Infinity;
+  if(c<500||v<1)return'LIFR';
+  if(c<1000||v<3)return'IFR';
+  if(c<=3000||v<=5)return'MVFR';
+  return'VFR';
+}
+const WX={TS:'Thunderstorm',TSRA:'Thunderstorm + Rain',RA:'Rain',SHRA:'Showers',SN:'Snow',SHSN:'Snow showers',FZRA:'Freezing rain',FZDZ:'Freezing drizzle',FG:'Fog',BR:'Mist',HZ:'Haze',FU:'Smoke',GR:'Hail',GS:'Small hail',DZ:'Drizzle',PL:'Ice pellets',BLSN:'Blowing snow',SQ:'Squall',FC:'Funnel cloud',VCTS:'Nearby thunderstorm',VCSH:'Nearby showers'};
+function wxDecode(str){
+  if(!str)return[];
+  return str.trim().split(/\s+/).map(tok=>{
+    const clean=tok.replace(/^[+-]/,'').toUpperCase();
+    const int=tok.startsWith('+')?'Heavy ':tok.startsWith('-')?'Light ':'';
+    const base=WX[clean]||WX[clean.slice(0,2)]||clean;
+    const severe=/TS|FZ|GR|SQ|FC|\+SN|\+RA|BLSN|PL/i.test(tok);
+    return{label:int+base,severe};
+  });
+}
+function fmtZ(iso){
+  if(!iso)return'';
+  const d=new Date(iso);
+  return isNaN(d)?esc(iso):d.toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+function windTxt(dir,spd,gst){
+  if(spd==null)return'\u2014';
+  return`${dir==null||dir===0?'Variable':dir+'\u00b0'} @ ${spd} kt${gst?' G'+gst:''}`;
+}
+function actionFor(cat,wind,gust,wxItems){
+  const hazards=wxItems.filter(w=>w.severe).map(w=>w.label);
+  const highWind=(gust&&gust>=30)||(wind&&wind>=25);
+  if(cat==='LIFR')return{cls:'high',ic:'\ud83d\udd34',txt:'<b>High disruption risk.</b> Near-minimums \u2014 expect delays, diversions and possible ground stops. Pre-position recovery options and review OA rebooking capacity.'};
+  if(cat==='IFR')return{cls:'high',ic:'\ud83d\udfe0',txt:'<b>Elevated risk.</b> IFR conditions likely to slow arrival/departure rates. Build schedule buffer and watch for holding/flow programs.'};
+  if(highWind||hazards.length){const list=[...hazards.length?[hazards.join(', ')]:[],...highWind?['strong winds/gusts']:[]];return{cls:'med',ic:'\ud83d\udfe1',txt:`<b>Monitor.</b> ${list.join(' and ')} may cause intermittent delays. Watch amendments and de-ice/runway-config impacts.`};}
+  if(cat==='MVFR')return{cls:'med',ic:'\ud83d\udfe1',txt:'<b>Marginal.</b> Generally operable \u2014 watch trend, could tip into IFR.'};
+  return{cls:'low',ic:'\ud83d\udfe2',txt:'<b>No weather constraint.</b> VFR conditions \u2014 no weather-driven disruption expected.'};
+}
+function rank(cat){return{VFR:0,MVFR:1,IFR:2,LIFR:3}[cat]||0;}
 
-function metricBox(k,v,u){
-  return `<div class="metric"><div class="k">${esc(k)}</div><div class="v">${esc(v)} <span class="u">${esc(u)}</span></div></div>`;
-}
 function buildPeriods(taf){
   if(!taf||!Array.isArray(taf.fcsts))return[];
   return taf.fcsts.map(f=>{
-    const ceil=ceilingFt(f.clouds),vis=visMi(f.visib),cat=category(ceil===Infinity?null:ceil,vis),wx=wxDecode(f.wxString);
-    return{from:f.timeFrom?new Date(f.timeFrom*1000).toISOString():(f.timeBec||null),to:f.timeTo?new Date(f.timeTo*1000).toISOString():null,change:f.fcstChange||null,probability:f.probability||null,cat,ceil,vis,wx,wdir:f.wdir,wspd:f.wspd,wgst:f.wgst};
+    const ceil=ceilingFt(f.clouds),vis=visMi(f.visib);
+    return{from:f.timeFrom?new Date(f.timeFrom*1000).toISOString():f.timeBec||null,to:f.timeTo?new Date(f.timeTo*1000).toISOString():null,change:f.fcstChange||null,probability:f.probability||null,cat:category(ceil===Infinity?null:ceil,vis),ceil,vis,wx:wxDecode(f.wxString),wdir:f.wdir,wspd:f.wspd,wgst:f.wgst};
   });
 }
-function forecastCard(p){
-  const cls=p.cat.toLowerCase();
-  const act=actionFor(p.cat,p.wspd,p.wgst,p.wx);
-  const change=p.change?`<span class="wx-tag">${esc(p.change)}${p.probability?` ${p.probability}%`:""}</span>`:"";
-  let head=fmtZ(p.from);
-  if(p.to)head+=` \u2192 ${fmtZ(p.to)}`;
-  const tags=change+p.wx.map(w=>`<span class="wx-tag ${w.severe?"risk":""} ">${esc(w.label)}</span>`).join("");
-  return `<div class="fcard ${cls}"><div class="fcard-top"><div class="fcard-time">${head}<small>Forecast period (times local)</small></div><span class="cat ${cls}">${p.cat}</span></div>${tags?`<div class="wx-tags">${tags}</div>`:""}<div class="fgrid"><div><div class="k">Wind</div><div class="v">${esc(windTxt(p.wdir,p.wspd,p.wgst))}</div></div><div><div class="k">Visibility</div><div class="v">${p.vis==null?"\u2014":esc(p.vis)+" mi"}</div></div><div><div class="k">Ceiling</div><div class="v">${p.ceil===Infinity?"None":esc(p.ceil.toLocaleString())+" ft"}</div></div></div><div class="action"><span class="a-ic">${act.ic}</span><span class="a-tx">${act.txt}</span></div></div>`;
+
+function mbox(k,v,u){return`<div class="metric"><div class="k">${esc(k)}</div><div class="v">${esc(v)} <span class="u">${esc(u)}</span></div></div>`;}
+
+function fcard(p){
+  const cls=p.cat.toLowerCase(),act=actionFor(p.cat,p.wspd,p.wgst,p.wx);
+  let head=fmtZ(p.from);if(p.to)head+=` \u2192 ${fmtZ(p.to)}`;
+  const change=p.change?`<span class="wxt">${esc(p.change)}${p.probability?` ${p.probability}%`:''}</span>`:'';
+  const tags=change+p.wx.map(w=>`<span class="wxt${w.severe?' risk':''}">${esc(w.label)}</span>`).join('');
+  return`<div class="fcard ${cls}"><div class="fcard-top"><div class="ftime">${head}<small>Forecast period (times local)</small></div><span class="cat ${cls}">${p.cat}</span></div>${tags?`<div class="wx-tags">${tags}</div>`:''}<div class="fgrid"><div><div class="k">Wind</div><div class="v">${esc(windTxt(p.wdir,p.wspd,p.wgst))}</div></div><div><div class="k">Visibility</div><div class="v">${p.vis==null?'\u2014':esc(p.vis)+' mi'}</div></div><div><div class="k">Ceiling</div><div class="v">${p.ceil===Infinity?'None':esc(p.ceil.toLocaleString())+' ft'}</div></div></div><div class="action"><span>${act.ic}</span>&nbsp;<span>${act.txt}</span></div></div>`;
+}
+
+function render(id,metar,taf){
+  if(!metar&&!taf){out.innerHTML=`<div class="err"><b>No data for "${esc(id)}".</b> Check the 4-letter ICAO code (e.g. CYTZ not YTZ).</div>`;return;}
+  const name=(metar?.name)||(taf?.name)||id;
+  const periods=buildPeriods(taf);
+  let worst='VFR';
+  periods.forEach(p=>{if(rank(p.cat)>rank(worst))worst=p.cat;});
+  if(metar?.fltCat&&rank(metar.fltCat)>rank(worst))worst=metar.fltCat;
+  const oa=actionFor(worst,null,null,[]);
+  let html=`<div class="assess ${oa.cls}"><div class="ic">${oa.ic}</div><div><h2>${esc(name)} \u2014 outlook: ${worst}</h2><p>Worst expected category across current obs &amp; forecast window. ${worst==='VFR'?'No weather-driven disruption anticipated.':worst==='MVFR'?'Marginal \u2014 monitor for changes.':'Weather likely to impact operations \u2014 plan recovery options.'}</p></div></div>`;
+  html+=`<h3 class="sn">${esc(name)} <span style="color:var(--text-2);font-weight:400">(${esc(id)})</span></h3>`;
+  if(metar){
+    const ceil=ceilingFt(metar.clouds),vis=visMi(metar.visib);
+    const cat=metar.fltCat||category(ceil===Infinity?null:ceil,vis);
+    const wx=wxDecode(metar.wxString);
+    html+=`<div class="slabel">Current conditions (METAR) \u2014 observed ${fmtZ(metar.reportTime||metar.obsTime)}</div>`;
+    html+=`<div style="margin-bottom:10px"><span class="cat ${cat.toLowerCase()}">${cat}</span></div>`;
+    html+=`<div class="metrics">${mbox('Wind',windTxt(metar.wdir,metar.wspd,metar.wgst),'')}${mbox('Visibility',vis==null?'\u2014':vis,vis==null?'':'mi')}${mbox('Ceiling',ceil===Infinity?'None':ceil.toLocaleString(),ceil===Infinity?'':'ft')}${mbox('Temp',metar.temp==null?'\u2014':Math.round(metar.temp),metar.temp==null?'':'\u00b0C')}</div>`;
+    if(wx.length)html+=`<div class="wx-tags">${wx.map(w=>`<span class="wxt${w.severe?' risk':''}">${esc(w.label)}</span>`).join('')}</div>`;
+    if(metar.rawOb)html+=`<div class="raw">${esc(metar.rawOb)}</div>`;
+  }
+  html+=`<div class="slabel">Forecast (TAF)${taf?.rawTAF?` \u2014 issued ${fmtZ(taf.issueTime)}`:''}</div>`;
+  if(!periods.length)html+='<div class="err">No TAF published for this station. Not all airports issue a TAF.</div>';
+  else{
+    html+=`<div class="fcards">${periods.map(fcard).join('')}</div>`;
+    if(taf?.rawTAF)html+=`<div class="raw" style="margin-top:14px">${esc(taf.rawTAF)}</div>`;
+  }
+  out.innerHTML=html;
 }
 </script>
 </body>
