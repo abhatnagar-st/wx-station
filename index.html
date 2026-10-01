@@ -14,7 +14,7 @@ h1{font-size:30px;line-height:1.2;margin:0;letter-spacing:-.01em}
 .vbadge{font-size:12px;font-weight:700;padding:4px 12px;border-radius:999px;background:var(--blue-soft);color:var(--blue);border:1px solid var(--blue);white-space:nowrap;margin-top:6px}
 .sub{color:var(--text-2);font-size:15px;margin:4px 0 0}
 /* Source tabs */
-.src-tabs{display:flex;gap:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:24px 0 0;width:fit-content}
+.provider-chooser{margin:28px 0 8px}.provider-chooser h2{font-size:20px;margin:0 0 6px}.provider-chooser>p{margin:0 0 16px;color:var(--text-2);font-size:14px}.ptable-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--r);box-shadow:0 1px 2px rgba(0,0,0,.04)}.ptable{width:100%;border-collapse:collapse;min-width:760px;background:var(--canvas)}.ptable th,.ptable td{text-align:left;padding:13px 14px;border-bottom:1px solid var(--border);font-size:14px;vertical-align:middle}.ptable th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-2);background:var(--soft)}.ptable tr:last-child td{border-bottom:none}.ptable tr:hover td{background:var(--soft)}.pname{font-weight:700}.pnote{font-size:12px;color:var(--text-2);display:block;margin-top:2px}.free{font-size:11px;font-weight:700;color:var(--green);background:var(--green-soft);border:1px solid var(--green);border-radius:999px;padding:3px 8px;white-space:nowrap}.pick{min-height:36px;padding:0 14px;border:1px solid var(--blue);color:var(--blue);background:var(--canvas);border-radius:8px;font-weight:700;cursor:pointer}.pick:hover,.pick.primary{background:var(--blue);color:#fff}.workspace{display:none}.workspace.active{display:block}.provider-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:24px 0 0;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:var(--soft);font-size:14px}.provider-bar button{border:none;background:none;color:var(--blue);font-weight:700;cursor:pointer;font-family:var(--sans)}.src-tabs{display:flex;gap:0;border:1px solid var(--border);border-radius:10px;overflow-x:auto;margin:12px 0 0;width:100%}
 .src-tab{padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;border:none;background:var(--soft);color:var(--text-2);font-family:var(--sans);border-right:1px solid var(--border)}
 .src-tab:last-child{border-right:none}
 .src-tab.active{background:var(--blue);color:#fff}
@@ -99,20 +99,49 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--border);font-
 .legitem{display:flex;align-items:center;gap:6px}
 .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
 .dot.vfr{background:var(--green)}.dot.mvfr{background:var(--blue)}.dot.ifr{background:var(--orange)}.dot.lifr{background:var(--red)}
-@media(max-width:540px){.wrap{padding:24px 16px 48px}h1{font-size:22px}button.go{flex:1 1 100%;align-self:stretch}.src-tabs{width:100%}.src-tab{flex:1;text-align:center}}
+@media(max-width:540px){.wrap{padding:24px 16px 48px}h1{font-size:22px}button.go{flex:1 1 100%;align-self:stretch}.src-tabs{width:100%}.src-tab{flex:1 0 auto;text-align:center;padding:10px 14px}.provider-bar{align-items:flex-start}.ptable{min-width:0;table-layout:fixed}.ptable th,.ptable td{padding:11px 12px}.ptable th:nth-child(3),.ptable th:nth-child(4),.ptable th:nth-child(5),.ptable td:nth-child(3),.ptable td:nth-child(4),.ptable td:nth-child(5){display:none}.ptable th:nth-child(1){width:42%}.ptable th:nth-child(2){width:34%}.ptable th:nth-child(6){width:24%}.pick{width:100%;padding:0 8px;font-size:12px}.pnote{font-size:11px}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="topbar">
     <h1>Station Weather &amp; Disruption Outlook</h1>
-    <span class="vbadge">v5.0 &mdash; Jul 27 2026</span>
+    <span class="vbadge">v6.0 &mdash; Oct 1 2026</span>
   </div>
-  <p class="sub">Live METAR &amp; TAF decoded into action blocks for disruption planning. Choose a data source below.</p>
+  <p class="sub">Compare free weather providers, then turn METAR, TAF and model guidance into action blocks for disruption planning.</p>
 
-  <div class="src-tabs">
-    <button class="src-tab active" id="tab-noaa" onclick="switchTab('noaa')">NOAA &mdash; aviationweather.gov <span style="font-weight:400;opacity:.7">(Free, no key)</span></button>
-    <button class="src-tab" id="tab-cwx" onclick="switchTab('cwx')">CheckWX API <span style="font-weight:400;opacity:.7">(Free key, global)</span></button>
+  <section class="provider-chooser" id="provider-chooser" aria-labelledby="provider-title">
+    <h2 id="provider-title">Choose a free weather provider</h2>
+    <p>Select a source below. Automatic mode starts with official NOAA data and falls back to a configured free-key provider if needed.</p>
+    <div class="ptable-wrap">
+      <table class="ptable">
+        <thead><tr><th>Provider</th><th>Data</th><th>Coverage</th><th>API key</th><th>Free access</th><th></th></tr></thead>
+        <tbody>
+          <tr><td><span class="pname">Automatic</span><span class="pnote">Recommended fallback chain</span></td><td>METAR + TAF</td><td>Global</td><td>Optional</td><td><span class="free">FREE</span></td><td><button class="pick primary" onclick="chooseProvider('auto')">Use auto</button></td></tr>
+          <tr><td><span class="pname">NOAA / AWC</span><span class="pnote">Official public aviation data</span></td><td>METAR + TAF</td><td>Global; strongest in North America</td><td>No</td><td><span class="free">FREE</span></td><td><button class="pick" onclick="chooseProvider('noaa')">Select</button></td></tr>
+          <tr><td><span class="pname">AVWX</span><span class="pnote">Parsed aviation weather</span></td><td>Decoded METAR + TAF</td><td>Global</td><td>Free token</td><td><span class="free">FREE BASIC</span></td><td><button class="pick" onclick="chooseProvider('avwx')">Select</button></td></tr>
+          <tr><td><span class="pname">CheckWX</span><span class="pnote">Developer-friendly decoded JSON</span></td><td>Decoded METAR + TAF</td><td>Global</td><td>Free key</td><td><span class="free">FREE TIER</span></td><td><button class="pick" onclick="chooseProvider('cwx')">Select</button></td></tr>
+          <tr><td><span class="pname">Open-Meteo</span><span class="pnote">Model guidance; not official aviation weather</span></td><td>Hourly wind, visibility, cloud and precipitation</td><td>Global</td><td>No</td><td><span class="free">FREE*</span></td><td><button class="pick" onclick="chooseProvider('om')">Select</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="hint">*Provider limits and commercial-use terms apply. Do not use this page as a substitute for an approved operational flight briefing.</p>
+  </section>
+
+  <div class="workspace" id="workspace">
+    <div class="provider-bar"><span>Selected provider: <strong id="selected-provider">Automatic</strong></span><button onclick="showProviderChooser()">Change provider</button></div>
+    <div class="src-tabs" aria-label="Weather provider">
+      <button class="src-tab active" id="tab-auto" onclick="switchTab('auto')">Automatic</button>
+      <button class="src-tab" id="tab-noaa" onclick="switchTab('noaa')">NOAA</button>
+      <button class="src-tab" id="tab-avwx" onclick="switchTab('avwx')">AVWX</button>
+      <button class="src-tab" id="tab-cwx" onclick="switchTab('cwx')">CheckWX</button>
+      <button class="src-tab" id="tab-om" onclick="switchTab('om')">Open-Meteo</button>
+    </div>
+
+  <!-- Automatic panel -->
+  <div class="src-panel active" id="panel-auto">
+    <div class="sbar"><div class="field"><label for="apt-auto">Airport (ICAO code)</label><input id="apt-auto" class="icao" placeholder="e.g. CYTZ, KJFK, EGLL" autocomplete="off" maxlength="4" /></div><button class="go" id="go-auto">Get best available forecast</button></div>
+    <p class="hint">Uses NOAA first, then AVWX or CheckWX when a saved free API key is available.</p><div class="chips" id="chips-auto"></div><div id="out-auto"></div>
   </div>
 
   <!-- NOAA panel -->
@@ -148,6 +177,19 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--border);font-
     <div id="out-cwx"></div>
   </div>
 
+  <!-- AVWX panel -->
+  <div class="src-panel" id="panel-avwx">
+    <div class="sbar"><div class="field" style="flex:2 1 260px"><label for="key-avwx">AVWX token <span id="avwxsaved-badge"></span></label><input id="key-avwx" placeholder="Paste your free AVWX token" autocomplete="off" /></div><div class="field"><label for="apt-avwx">Airport (ICAO code)</label><input id="apt-avwx" class="icao" placeholder="e.g. CYTZ, EGLL, VHHH" autocomplete="off" maxlength="4" /></div><button class="go" id="go-avwx">Get forecast</button></div>
+    <div class="keyinfo">Create a free account and token at <a href="https://account.avwx.rest" target="_blank" rel="noopener">account.avwx.rest</a>. The token is stored only in this browser.</div><p class="hint" style="margin-top:12px">Quick picks:</p><div class="chips" id="chips-avwx"></div><div id="out-avwx"></div>
+  </div>
+
+  <!-- Open-Meteo panel -->
+  <div class="src-panel" id="panel-om">
+    <div class="sbar"><div class="field"><label for="apt-om">Airport label</label><input id="apt-om" class="icao" placeholder="e.g. CYTZ" autocomplete="off" maxlength="8" /></div><div class="field"><label for="lat-om">Latitude</label><input id="lat-om" inputmode="decimal" placeholder="43.6275" /></div><div class="field"><label for="lon-om">Longitude</label><input id="lon-om" inputmode="decimal" placeholder="-79.3962" /></div><button class="go" id="go-om">Get model outlook</button></div>
+    <div class="keyinfo"><b>Model guidance only.</b> Open-Meteo does not provide official METAR or TAF. Choose a quick pick or enter airport coordinates.</div><p class="hint" style="margin-top:12px">Quick picks:</p><div class="chips" id="chips-om"></div><div id="out-om"></div>
+  </div>
+  </div><!-- /workspace -->
+
   <footer>
     <strong>Flight category legend:</strong>
     <div class="legrow">
@@ -156,21 +198,35 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--border);font-
       <span class="legitem"><span class="dot ifr"></span> IFR 500&ndash;1000 ft or 1&ndash;3 mi</span>
       <span class="legitem"><span class="dot lifr"></span> LIFR &lt;500 ft or &lt;1 mi</span>
     </div>
-    <p style="margin-top:10px">NOAA: aviationweather.gov (US/Canada best) &nbsp;|&nbsp; CheckWX: checkwxapi.com (global, decoded, free tier 100/hr)</p>
+    <p style="margin-top:10px">Sources: NOAA/AWC official data &nbsp;|&nbsp; AVWX and CheckWX decoded aviation weather &nbsp;|&nbsp; Open-Meteo model guidance</p>
   </footer>
 </div>
 <script>
 var QUICK_NOAA=[['CYTZ','Toronto City'],['CYYZ','Toronto Pearson'],['KJFK','New York JFK'],['KBOS','Boston'],['KORD',"Chicago O'Hare"],['EGLL','London Heathrow']];
 var QUICK_CWX=[['CYTZ','Toronto City'],['CYYZ','Toronto Pearson'],['EGLL','London Heathrow'],['VHHH','Hong Kong'],['OMDB','Dubai'],['WSSS','Singapore']];
+var AIRPORTS={CYTZ:[43.6275,-79.3962,'Toronto City'],CYYZ:[43.6777,-79.6248,'Toronto Pearson'],KJFK:[40.6413,-73.7781,'New York JFK'],KBOS:[42.3656,-71.0096,'Boston'],KORD:[41.9742,-87.9073,"Chicago O'Hare"],EGLL:[51.4700,-0.4543,'London Heathrow'],VHHH:[22.3080,113.9185,'Hong Kong'],OMDB:[25.2532,55.3657,'Dubai'],WSSS:[1.3644,103.9915,'Singapore']};
+var AVWX_API='https://avwx.rest/api';
+var OM_API='https://api.open-meteo.com/v1/forecast';
 var NOAA_API='https://aviationweather.gov/api/data';
 var CWX_API='https://api.checkwx.com/v2';
 
 /* ---- Tab switching ---- */
+var PROVIDER_NAMES={auto:'Automatic',noaa:'NOAA / AWC',avwx:'AVWX',cwx:'CheckWX',om:'Open-Meteo'};
+function chooseProvider(t){
+  localStorage.setItem('wx_provider',t);
+  document.getElementById('provider-chooser').style.display='none';
+  document.getElementById('workspace').classList.add('active');
+  switchTab(t);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function showProviderChooser(){document.getElementById('workspace').classList.remove('active');document.getElementById('provider-chooser').style.display='block';window.scrollTo({top:0,behavior:'smooth'});}
 function switchTab(t){
-  ['noaa','cwx'].forEach(function(id){
+  ['auto','noaa','avwx','cwx','om'].forEach(function(id){
     document.getElementById('tab-'+id).classList.toggle('active',id===t);
     document.getElementById('panel-'+id).classList.toggle('active',id===t);
   });
+  document.getElementById('selected-provider').textContent=PROVIDER_NAMES[t];
+  localStorage.setItem('wx_provider',t);
 }
 
 /* ---- Quick pick chips ---- */
@@ -184,8 +240,11 @@ function buildChips(arr,inputId,runFn){
     el.appendChild(c);
   });
 }
+buildChips(QUICK_NOAA,'apt-auto',runAuto);
 buildChips(QUICK_NOAA,'apt-noaa',runNoaa);
 buildChips(QUICK_CWX,'apt-cwx',runCwx);
+buildChips(QUICK_CWX,'apt-avwx',runAvwx);
+(function(){var el=document.getElementById('chips-om');Object.keys(AIRPORTS).slice(0,6).forEach(function(code){var a=AIRPORTS[code],b=document.createElement('button');b.className='chip';b.textContent=code+' · '+a[2];b.onclick=function(){document.getElementById('apt-om').value=code;document.getElementById('lat-om').value=a[0];document.getElementById('lon-om').value=a[1];runOpenMeteo();};el.appendChild(b);});})();
 
 /* ---- API key persistence ---- */
 var savedKey=localStorage.getItem('cwx_key')||'';
@@ -198,12 +257,20 @@ document.getElementById('key-cwx').addEventListener('input',function(){
   var v=this.value.trim();
   if(v){localStorage.setItem('cwx_key',v);showKeySaved(true);}else{localStorage.removeItem('cwx_key');showKeySaved(false);}
 });
+var savedAvwx=localStorage.getItem('avwx_key')||'';
+if(savedAvwx){document.getElementById('key-avwx').value=savedAvwx;document.getElementById('avwxsaved-badge').innerHTML='<span class="keysaved">Saved</span>';}
+document.getElementById('key-avwx').addEventListener('input',function(){var v=this.value.trim();if(v){localStorage.setItem('avwx_key',v);document.getElementById('avwxsaved-badge').innerHTML='<span class="keysaved">Saved</span>';}else{localStorage.removeItem('avwx_key');document.getElementById('avwxsaved-badge').innerHTML='';}});
 
 /* ---- Wire buttons ---- */
 document.getElementById('go-noaa').addEventListener('click',runNoaa);
 document.getElementById('apt-noaa').addEventListener('keydown',function(e){if(e.key==='Enter')runNoaa();});
 document.getElementById('go-cwx').addEventListener('click',runCwx);
 document.getElementById('apt-cwx').addEventListener('keydown',function(e){if(e.key==='Enter')runCwx();});
+document.getElementById('go-auto').addEventListener('click',runAuto);
+document.getElementById('apt-auto').addEventListener('keydown',function(e){if(e.key==='Enter')runAuto();});
+document.getElementById('go-avwx').addEventListener('click',runAvwx);
+document.getElementById('apt-avwx').addEventListener('keydown',function(e){if(e.key==='Enter')runAvwx();});
+document.getElementById('go-om').addEventListener('click',runOpenMeteo);
 
 /* ---- Utilities ---- */
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -465,6 +532,42 @@ function runCwx(){
   cwxFetch('/metar/'+encodeURIComponent(id)+'/decoded',key,function(e,d){if(!e)metar=normCwxMetar(d);finish(e);});
   cwxFetch('/taf/'+encodeURIComponent(id)+'/decoded',key,function(e,d){if(!e)taf=normCwxTaf(d);finish(e);});
 }
+
+/* ---- AVWX ---- */
+function avwxFetch(kind,id,key,cb){
+  var x=new XMLHttpRequest();x.open('GET',AVWX_API+'/'+kind+'/'+encodeURIComponent(id));x.setRequestHeader('Authorization','BEARER '+key);x.timeout=12000;
+  x.onload=function(){if(x.status===401||x.status===403){cb(new Error('invalid_key'));return;}if(x.status>=200&&x.status<300){try{cb(null,JSON.parse(x.responseText));}catch(e){cb(e);}}else cb(new Error('status '+x.status));};x.onerror=function(){cb(new Error('network'));};x.ontimeout=function(){cb(new Error('timeout'));};x.send();
+}
+function av(v){return v&&v.value!=null?v.value:null;}
+function normAvwxClouds(a){return(a||[]).map(function(c){return{cover:c.type||c.repr||'',base:av(c.altitude)!=null?av(c.altitude)*100:null};});}
+function normAvwxWx(a){return(a||[]).map(function(w){var z=w.value||w.repr||'';return wxDecode(z)[0]||{label:z,severe:false,code:z};});}
+function normAvwxMetar(m){if(!m)return null;var clouds=normAvwxClouds(m.clouds);return{name:(m.station&&m.station.name)||m.station||'',fltCat:m.flight_rules||calcCat(ceilFt(clouds),av(m.visibility)),wdir:av(m.wind_direction),wspd:av(m.wind_speed),wgst:av(m.wind_gust),visib:av(m.visibility),clouds:clouds,wxArr:normAvwxWx(m.wx_codes),temp:av(m.temperature),rawOb:m.raw,observed:m.time&&m.time.dt,remarks_decoded:[]};}
+function normAvwxTaf(t){if(!t)return null;return{name:(t.station&&t.station.name)||t.station||'',raw_text:t.raw,issued:t.time&&t.time.dt,fcsts:(t.forecast||[]).map(function(f){var clouds=normAvwxClouds(f.clouds);return{timeFrom:f.start_time&&f.start_time.dt,timeTo:f.end_time&&f.end_time.dt,wdir:av(f.wind_direction),wspd:av(f.wind_speed),wgst:av(f.wind_gust),visib:av(f.visibility),clouds:clouds,wxArr:normAvwxWx(f.wx_codes),fcstChange:f.type||null,probability:null,ct:f.flight_rules||calcCat(ceilFt(clouds),av(f.visibility))};})};}
+function runAvwx(){
+  var id=document.getElementById('apt-avwx').value.trim().toUpperCase(),key=document.getElementById('key-avwx').value.trim(),out=document.getElementById('out-avwx'),btn=document.getElementById('go-avwx');
+  if(!id){document.getElementById('apt-avwx').focus();return;}if(!key){out.innerHTML='<div class="err-box"><b>AVWX token required.</b> Create a free token at account.avwx.rest.</div>';return;}
+  btn.disabled=true;out.innerHTML='<div class="state"><div class="spinner"></div>Fetching AVWX data for '+esc(id)+'&hellip;</div>';var done=0,metar=null,taf=null,keyErr=false;
+  function finish(e){done++;if(e&&(e.message==='invalid_key'))keyErr=true;if(done<2)return;btn.disabled=false;if(keyErr){out.innerHTML='<div class="err-box"><b>Invalid AVWX token.</b> Check the saved token and try again.</div>';return;}if(!metar&&!taf){out.innerHTML='<div class="err-box"><b>AVWX returned no data for '+esc(id)+'.</b></div>';return;}render(id,metar,taf,'out-avwx','AVWX');}
+  avwxFetch('metar',id,key,function(e,d){if(!e)metar=normAvwxMetar(d);finish(e);});avwxFetch('taf',id,key,function(e,d){if(!e)taf=normAvwxTaf(d);finish(e);});
+}
+
+/* ---- Automatic fallback ---- */
+function runAuto(){
+  var id=document.getElementById('apt-auto').value.trim().toUpperCase(),out=document.getElementById('out-auto'),btn=document.getElementById('go-auto');if(!id){document.getElementById('apt-auto').focus();return;}
+  btn.disabled=true;out.innerHTML='<div class="state"><div class="spinner"></div>Trying NOAA for '+esc(id)+'&hellip;</div>';var done=0,m=null,t=null;
+  function first(){done++;if(done<2)return;if(m||t){btn.disabled=false;render(id,m,t,'out-auto','NOAA · automatic');return;}var ak=localStorage.getItem('avwx_key')||'';if(ak){out.innerHTML='<div class="state"><div class="spinner"></div>NOAA unavailable. Trying AVWX&hellip;</div>';var n=0,am=null,at=null;function af(){n++;if(n<2)return;if(am||at){btn.disabled=false;render(id,am,at,'out-auto','AVWX fallback');}else tryCwx();}avwxFetch('metar',id,ak,function(e,d){if(!e)am=normAvwxMetar(d);af();});avwxFetch('taf',id,ak,function(e,d){if(!e)at=normAvwxTaf(d);af();});}else tryCwx();}
+  function tryCwx(){var ck=localStorage.getItem('cwx_key')||'';if(!ck){btn.disabled=false;out.innerHTML='<div class="err-box"><b>NOAA was unavailable.</b> Save a free AVWX or CheckWX key to enable automatic fallback.</div>';return;}out.innerHTML='<div class="state"><div class="spinner"></div>Trying CheckWX fallback&hellip;</div>';var n=0,cm=null,ct=null;function cf(){n++;if(n<2)return;btn.disabled=false;if(cm||ct)render(id,cm,ct,'out-auto','CheckWX fallback');else out.innerHTML='<div class="err-box"><b>All configured providers failed.</b> Wait a moment and try again.</div>';}cwxFetch('/metar/'+encodeURIComponent(id)+'/decoded',ck,function(e,d){if(!e)cm=normCwxMetar(d);cf();});cwxFetch('/taf/'+encodeURIComponent(id)+'/decoded',ck,function(e,d){if(!e)ct=normCwxTaf(d);cf();});}
+  tryFetch(NOAA_API+'/metar?ids='+encodeURIComponent(id)+'&format=json',0,function(e,d){if(!e&&d)m=(Array.isArray(d)?d[0]:d)||null;first();});tryFetch(NOAA_API+'/taf?ids='+encodeURIComponent(id)+'&format=json',0,function(e,d){if(!e&&d)t=(Array.isArray(d)?d[0]:d)||null;first();});
+}
+
+/* ---- Open-Meteo model guidance ---- */
+function omRisk(vis,gust,precip,code,low){if(vis<1000||gust>=40||[95,96,97,99].indexOf(code)>=0)return['high','HIGH','Severe model signal'];if(vis<5000||gust>=30||precip>0.5||code>=71||low>=90)return['med','MONITOR','Possible operational constraint'];return['low','LOW','No major model signal'];}
+function runOpenMeteo(){
+  var label=document.getElementById('apt-om').value.trim().toUpperCase()||'LOCATION',lat=parseFloat(document.getElementById('lat-om').value),lon=parseFloat(document.getElementById('lon-om').value),out=document.getElementById('out-om'),btn=document.getElementById('go-om');if(!isFinite(lat)||!isFinite(lon)){out.innerHTML='<div class="err-box"><b>Coordinates required.</b> Choose a quick pick or enter latitude and longitude.</div>';return;}
+  btn.disabled=true;out.innerHTML='<div class="state"><div class="spinner"></div>Fetching Open-Meteo model guidance&hellip;</div>';var vars='visibility,cloud_cover_low,wind_speed_10m,wind_direction_10m,wind_gusts_10m,precipitation_probability,precipitation,snowfall,weather_code,freezing_level_height';var url=OM_API+'?latitude='+lat+'&longitude='+lon+'&hourly='+vars+'&forecast_days=3&wind_speed_unit=kn&timezone=auto';
+  fetch(url).then(function(r){if(!r.ok)throw new Error('status '+r.status);return r.json();}).then(function(d){btn.disabled=false;var h=d.hourly||{},rows=[];for(var i=0;i<(h.time||[]).length;i++){var when=new Date(h.time[i]);if(when.getTime()<Date.now()-3600000)continue;rows.push({time:h.time[i],vis:(h.visibility||[])[i],low:(h.cloud_cover_low||[])[i],spd:(h.wind_speed_10m||[])[i],dir:(h.wind_direction_10m||[])[i],gust:(h.wind_gusts_10m||[])[i],pop:(h.precipitation_probability||[])[i],precip:(h.precipitation||[])[i],snow:(h.snowfall||[])[i],code:(h.weather_code||[])[i],fz:(h.freezing_level_height||[])[i]});if(rows.length>=24)break;}var worst=['low','LOW','No major model signal'];rows.forEach(function(r){var z=omRisk(r.vis,r.gust,r.precip,r.code,r.low);if(z[0]==='high'||(z[0]==='med'&&worst[0]==='low'))worst=z;});var html='<div class="assess '+worst[0]+'"><div><h2>'+esc(label)+' — 24-hour model outlook: '+worst[1]+' <span class="srcbadge">Open-Meteo</span></h2><p>'+worst[2]+'. Model guidance only; verify against official METAR, TAF and advisories.</p></div></div><div class="slabel">Hourly model guidance</div><div class="fcards">';rows.filter(function(_,i){return i%3===0;}).forEach(function(r){var z=omRisk(r.vis,r.gust,r.precip,r.code,r.low);html+='<div class="fcard '+(z[0]==='high'?'ifr':z[0]==='med'?'mvfr':'vfr')+'"><div class="ftop"><div class="ftime">'+fmtZ(r.time)+'<small>Local model time</small></div><span class="abadge '+z[0]+'">'+z[1]+'</span></div><div class="fgrid"><div><div class="k">Wind</div><div class="v">'+esc(windStr(Math.round(r.dir),Math.round(r.spd),Math.round(r.gust)))+'</div></div><div><div class="k">Visibility</div><div class="v">'+(r.vis==null?'—':(r.vis/1609.344).toFixed(1)+' mi')+'</div></div><div><div class="k">Low cloud</div><div class="v">'+(r.low==null?'—':r.low+'%')+'</div></div><div><div class="k">Precip chance</div><div class="v">'+(r.pop==null?'—':r.pop+'%')+'</div></div></div><div class="action"><span>'+z[2]+(r.snow>0?' · Snow signal':'')+(r.fz!=null?' · Freezing level '+Math.round(r.fz*3.28084)+' ft':'')+'</span></div></div>';});html+='</div>';out.innerHTML=html;}).catch(function(e){btn.disabled=false;out.innerHTML='<div class="err-box"><b>Open-Meteo request failed.</b> '+esc(e.message)+'</div>';});
+}
+
 </script>
 </body>
 </html>
