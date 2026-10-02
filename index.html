@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Station Weather &amp; Disruption Outlook</title>
+<title>APR - Aviation Weather and Network Operations Decision Support</title>
 <style>
-:root{--text:#2C2C2B;--text-2:#7D7A75;--canvas:#fff;--soft:#F9F8F7;--surface-2:#F0EFED;--border:#E6E5E3;--blue:#2783DE;--blue-soft:#E5F2FC;--green:#46A171;--green-soft:#E8F1EC;--orange:#D5803B;--orange-soft:#FBEBDE;--red:#E56458;--red-soft:#FCE9E7;--r:12px;--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;--mono:Menlo,Consolas,'SF Mono',monospace}
+:root{--text:#F5F7FA;--text-2:#AEB6C2;--canvas:#050607;--soft:#111419;--surface-2:#1A1F26;--border:#303843;--blue:#64A8F3;--blue-soft:#102A43;--green:#72BC8F;--green-soft:#10291D;--orange:#E0A05A;--orange-soft:#33210F;--red:#F07B70;--red-soft:#351614;--r:12px;--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;--mono:Menlo,Consolas,'SF Mono',monospace}
 *{box-sizing:border-box}
-body{margin:0;font-family:var(--sans);font-size:16px;line-height:1.5;color:var(--text);background:var(--canvas)}
+body{margin:0;font-family:var(--sans);font-size:16px;line-height:1.5;color:var(--text);background:var(--canvas);color-scheme:dark}
 .wrap{max-width:1040px;margin:0 auto;padding:32px 24px 64px}
 .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:4px}
 h1{font-size:30px;line-height:1.2;margin:0;letter-spacing:-.01em}
@@ -45,7 +45,7 @@ button.go:disabled{opacity:.5;cursor:default}
 @keyframes spin{to{transform:rotate(360deg)}}
 .err-box{background:var(--red-soft);border:1px solid var(--red);border-radius:var(--r);padding:14px 16px;margin-top:16px;font-size:14px;line-height:1.7}
 /* Assessment banner */
-.assess{border-radius:var(--r);padding:18px 20px;margin:24px 0 8px;display:flex;gap:16px;align-items:flex-start;border:1px solid var(--border);box-shadow:0 1px 2px rgba(0,0,0,.05),0 4px 12px rgba(0,0,0,.04)}
+.assess{border-radius:var(--r);padding:18px 20px;margin:24px 0 8px;display:flex;gap:16px;align-items:flex-start;border:1px solid var(--border);box-shadow:0 1px 2px rgba(0,0,0,.45),0 6px 20px rgba(0,0,0,.28)}
 .assess h2{margin:0 0 4px;font-size:18px}
 .assess p{margin:0;font-size:14px;color:var(--text-2)}
 .assess.low{background:var(--green-soft);border-color:var(--green)}
@@ -57,7 +57,7 @@ button.go:disabled{opacity:.5;cursor:default}
 .iflag.ts{background:#fdf3ff;border-color:#a855f7;color:#7e22ce}
 .iflag.wind{background:var(--orange-soft);border-color:var(--orange);color:var(--orange)}
 .iflag.fz{background:var(--blue-soft);border-color:var(--blue);color:var(--blue)}
-.iflag.fog{background:var(--surface-2);border-color:#888;color:#444}
+.iflag.fog{background:var(--surface-2);border-color:#9AA4B2;color:var(--text)}
 .iflag.snow{background:#eef6ff;border-color:#60a5fa;color:#1d4ed8}
 .iflag.none{background:var(--green-soft);border-color:var(--green);color:var(--green)}
 /* Sections */
@@ -75,7 +75,7 @@ button.go:disabled{opacity:.5;cursor:default}
 .remarks ul{margin:6px 0 0;padding-left:20px;font-size:13px;color:var(--text-2)}
 /* Forecast cards */
 .fcards{display:flex;flex-direction:column;gap:14px}
-.fcard{border:1px solid var(--border);border-left-width:5px;border-radius:var(--r);padding:16px 18px;box-shadow:0 1px 2px rgba(0,0,0,.05),0 4px 12px rgba(0,0,0,.04)}
+.fcard{border:1px solid var(--border);border-left-width:5px;border-radius:var(--r);padding:16px 18px;box-shadow:0 1px 2px rgba(0,0,0,.45),0 6px 20px rgba(0,0,0,.28)}
 .fcard.vfr{border-left-color:var(--green)}.fcard.mvfr{border-left-color:var(--blue)}.fcard.ifr{border-left-color:var(--orange)}.fcard.lifr{border-left-color:var(--red)}
 .ftop{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
 .ftime{font-weight:700;font-size:15px}
@@ -105,14 +105,15 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--border);font-
 <body>
 <div class="wrap">
   <div class="topbar">
-    <h1>Station Weather &amp; Disruption Outlook</h1>
-    <span class="vbadge">v6.0 &mdash; Oct 1 2026</span>
+    <h1>APR - Aviation Weather and Network Operations Decision Support</h1>
+    <span class="vbadge">v6.1 &mdash; Oct 2 2026</span>
   </div>
-  <p class="sub">Compare free weather providers, then turn METAR, TAF and model guidance into action blocks for disruption planning.</p>
+  <p class="sub">Compare free weather providers and translate METAR, TAF and model guidance into explainable operational-risk signals.</p>
+  <div class="keyinfo" style="margin-top:18px"><b>Decision support only.</b> This page identifies potential weather constraints. It does not confirm or authorize a delay, cancellation, diversion, aircraft swap, or network-plan change. Operational decisions must come from airline-authorized personnel and authoritative operational sources.</div>
 
   <section class="provider-chooser" id="provider-chooser" aria-labelledby="provider-title">
     <h2 id="provider-title">Choose a free weather provider</h2>
-    <p>Select a source below. Automatic mode starts with official NOAA data and falls back to a configured free-key provider if needed.</p>
+    <p>Select a source below. Automatic mode starts with official NOAA data and falls back to a configured free-key provider. Results are planning guidance, not confirmed flight status.</p>
     <div class="ptable-wrap">
       <table class="ptable">
         <thead><tr><th>Provider</th><th>Data</th><th>Coverage</th><th>API key</th><th>Free access</th><th></th></tr></thead>
@@ -199,6 +200,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--border);font-
       <span class="legitem"><span class="dot lifr"></span> LIFR &lt;500 ft or &lt;1 mi</span>
     </div>
     <p style="margin-top:10px">Sources: NOAA/AWC official data &nbsp;|&nbsp; AVWX and CheckWX decoded aviation weather &nbsp;|&nbsp; Open-Meteo model guidance</p>
+  <p style="margin-top:12px"><b>Operational decision gate:</b> Confirm delays, cancellations, diversions and network changes through airline-authorized personnel, dispatch/NOC procedures, operational feeds, NOTAMs and applicable manuals.</p>
   </footer>
 </div>
 <script>
@@ -328,11 +330,11 @@ function windStr(dir,spd,gst){
 function getAction(ct,spd,gst,wx){
   var haz=wx.filter(function(w){return w.severe;}).map(function(w){return w.label;});
   var hw=(gst&&gst>=30)||(spd&&spd>=25);
-  if(ct==='LIFR')return{cls:'high',lbl:'HIGH RISK',txt:'<b>High disruption risk.</b> Near-minimums \u2014 expect delays, diversions, possible ground stops. Pre-position recovery and review OA rebooking capacity.'};
-  if(ct==='IFR')return{cls:'high',lbl:'ELEVATED',txt:'<b>Elevated risk.</b> IFR conditions will slow arrival/departure rates. Build schedule buffer, watch for holding and flow control programs.'};
-  if(hw||haz.length){var list=haz.concat(hw?['strong winds/gusts']:[]);return{cls:'med',lbl:'MONITOR',txt:'<b>Monitor.</b> '+list.join(', ')+' may cause intermittent delays. Watch NOTAMs, de-ice/runway ops.'}}
-  if(ct==='MVFR')return{cls:'med',lbl:'MARGINAL',txt:'<b>Marginal.</b> Generally operable \u2014 watch trend, could tip into IFR. No action needed yet.'};
-  return{cls:'low',lbl:'CLEAR',txt:'<b>No constraint.</b> VFR conditions \u2014 no weather disruption expected.'};
+  if(ct==='LIFR')return{cls:'high',lbl:'HIGH RISK',txt:'<b>High operational constraint risk.</b> Review airport acceptance rate, approach availability, aircraft limits, alternate requirements, and network recovery options.'};
+  if(ct==='IFR')return{cls:'high',lbl:'ELEVATED',txt:'<b>Elevated operational constraint risk.</b> Review arrival/departure capacity, active flow restrictions, schedule buffer, and the airline-approved station playbook.'};
+  if(hw||haz.length){var list=haz.concat(hw?['strong winds/gusts']:[]);return{cls:'med',lbl:'MONITOR',txt:'<b>Monitor operational exposure.</b> '+list.join(', ')+' detected. Review NOTAMs, runway/de-icing/ramp capability, and airline-approved limits.'}}
+  if(ct==='MVFR')return{cls:'med',lbl:'MARGINAL',txt:'<b>Marginal conditions.</b> Monitor the trend and compare it with the airline station profile; no operational decision is implied.'};
+  return{cls:'low',lbl:'CLEAR',txt:'<b>No weather constraint indicated by this source.</b> Continue normal operational monitoring and verify authoritative notices.'};
 }
 function rank(ct){return{VFR:0,MVFR:1,IFR:2,LIFR:3}[ct]||0;}
 
@@ -349,7 +351,7 @@ function iropFlags(wx,spd,gst,ct,vis){
   return flags;
 }
 function renderIropFlags(flags){
-  if(!flags.length)return'<div class="irop-row"><span class="iflag none">\u2705 No active IROP triggers</span></div>';
+  if(!flags.length)return'<div class="irop-row"><span class="iflag none">\u2705 No weather-risk flags in current observation</span></div>';
   return'<div class="irop-row">'+flags.map(function(f){return'<span class="iflag '+f.cls+'">'+f.ico+' '+esc(f.txt)+'</span>';}).join('')+'</div>';
 }
 
@@ -378,10 +380,11 @@ function render(id,metar,taf,outId,srcLabel){
   var flags=iropFlags(metarWx,metarSpd,metarGst,metar?metar.fltCat:'VFR',metarVis);
   var oa=getAction(worst,null,null,[]);
   var html='<div class="assess '+oa.cls+'">'
-    +'<div><h2>'+esc(name)+' \u2014 Outlook: '+worst+' <span class="srcbadge">via '+esc(srcLabel)+'</span></h2>'
+    +'<div><h2>'+esc(name)+' \u2014 Worst forecast category: '+worst+' <span class="srcbadge">via '+esc(srcLabel)+'</span></h2>'
     +'<p>'+oa.txt+'</p>'
     +renderIropFlags(flags)
-    +'</div></div>';
+    +'</div></div>'
+    +'<div class="keyinfo"><b>How this was determined:</b> the banner selects the worst category across the latest METAR/SPECI and all returned TAF periods. Category order is VFR → MVFR → IFR → LIFR. This is a weather-risk summary, not an airline operational decision.</div>';
   html+='<h3 class="sn">'+esc(name)+' <span style="color:var(--text-2);font-weight:400">('+esc(id)+')</span></h3>';
   if(metar){
     var ceil=ceilFt(metar.clouds),vis=visMi(metar.visib);
@@ -561,11 +564,11 @@ function runAuto(){
 }
 
 /* ---- Open-Meteo model guidance ---- */
-function omRisk(vis,gust,precip,code,low){if(vis<1000||gust>=40||[95,96,97,99].indexOf(code)>=0)return['high','HIGH','Severe model signal'];if(vis<5000||gust>=30||precip>0.5||code>=71||low>=90)return['med','MONITOR','Possible operational constraint'];return['low','LOW','No major model signal'];}
+function omRisk(vis,gust,precip,code,low){if(vis<1000||gust>=40||[95,96,97,99].indexOf(code)>=0)return['high','HIGH','Severe model constraint signal'];if(vis<5000||gust>=30||precip>0.5||code>=71||low>=90)return['med','MONITOR','Potential operational constraint'];return['low','LOW','No major model constraint signal'];}
 function runOpenMeteo(){
   var label=document.getElementById('apt-om').value.trim().toUpperCase()||'LOCATION',lat=parseFloat(document.getElementById('lat-om').value),lon=parseFloat(document.getElementById('lon-om').value),out=document.getElementById('out-om'),btn=document.getElementById('go-om');if(!isFinite(lat)||!isFinite(lon)){out.innerHTML='<div class="err-box"><b>Coordinates required.</b> Choose a quick pick or enter latitude and longitude.</div>';return;}
   btn.disabled=true;out.innerHTML='<div class="state"><div class="spinner"></div>Fetching Open-Meteo model guidance&hellip;</div>';var vars='visibility,cloud_cover_low,wind_speed_10m,wind_direction_10m,wind_gusts_10m,precipitation_probability,precipitation,snowfall,weather_code,freezing_level_height';var url=OM_API+'?latitude='+lat+'&longitude='+lon+'&hourly='+vars+'&forecast_days=3&wind_speed_unit=kn&timezone=auto';
-  fetch(url).then(function(r){if(!r.ok)throw new Error('status '+r.status);return r.json();}).then(function(d){btn.disabled=false;var h=d.hourly||{},rows=[];for(var i=0;i<(h.time||[]).length;i++){var when=new Date(h.time[i]);if(when.getTime()<Date.now()-3600000)continue;rows.push({time:h.time[i],vis:(h.visibility||[])[i],low:(h.cloud_cover_low||[])[i],spd:(h.wind_speed_10m||[])[i],dir:(h.wind_direction_10m||[])[i],gust:(h.wind_gusts_10m||[])[i],pop:(h.precipitation_probability||[])[i],precip:(h.precipitation||[])[i],snow:(h.snowfall||[])[i],code:(h.weather_code||[])[i],fz:(h.freezing_level_height||[])[i]});if(rows.length>=24)break;}var worst=['low','LOW','No major model signal'];rows.forEach(function(r){var z=omRisk(r.vis,r.gust,r.precip,r.code,r.low);if(z[0]==='high'||(z[0]==='med'&&worst[0]==='low'))worst=z;});var html='<div class="assess '+worst[0]+'"><div><h2>'+esc(label)+' — 24-hour model outlook: '+worst[1]+' <span class="srcbadge">Open-Meteo</span></h2><p>'+worst[2]+'. Model guidance only; verify against official METAR, TAF and advisories.</p></div></div><div class="slabel">Hourly model guidance</div><div class="fcards">';rows.filter(function(_,i){return i%3===0;}).forEach(function(r){var z=omRisk(r.vis,r.gust,r.precip,r.code,r.low);html+='<div class="fcard '+(z[0]==='high'?'ifr':z[0]==='med'?'mvfr':'vfr')+'"><div class="ftop"><div class="ftime">'+fmtZ(r.time)+'<small>Local model time</small></div><span class="abadge '+z[0]+'">'+z[1]+'</span></div><div class="fgrid"><div><div class="k">Wind</div><div class="v">'+esc(windStr(Math.round(r.dir),Math.round(r.spd),Math.round(r.gust)))+'</div></div><div><div class="k">Visibility</div><div class="v">'+(r.vis==null?'—':(r.vis/1609.344).toFixed(1)+' mi')+'</div></div><div><div class="k">Low cloud</div><div class="v">'+(r.low==null?'—':r.low+'%')+'</div></div><div><div class="k">Precip chance</div><div class="v">'+(r.pop==null?'—':r.pop+'%')+'</div></div></div><div class="action"><span>'+z[2]+(r.snow>0?' · Snow signal':'')+(r.fz!=null?' · Freezing level '+Math.round(r.fz*3.28084)+' ft':'')+'</span></div></div>';});html+='</div>';out.innerHTML=html;}).catch(function(e){btn.disabled=false;out.innerHTML='<div class="err-box"><b>Open-Meteo request failed.</b> '+esc(e.message)+'</div>';});
+  fetch(url).then(function(r){if(!r.ok)throw new Error('status '+r.status);return r.json();}).then(function(d){btn.disabled=false;var h=d.hourly||{},rows=[];for(var i=0;i<(h.time||[]).length;i++){var when=new Date(h.time[i]);if(when.getTime()<Date.now()-3600000)continue;rows.push({time:h.time[i],vis:(h.visibility||[])[i],low:(h.cloud_cover_low||[])[i],spd:(h.wind_speed_10m||[])[i],dir:(h.wind_direction_10m||[])[i],gust:(h.wind_gusts_10m||[])[i],pop:(h.precipitation_probability||[])[i],precip:(h.precipitation||[])[i],snow:(h.snowfall||[])[i],code:(h.weather_code||[])[i],fz:(h.freezing_level_height||[])[i]});if(rows.length>=24)break;}var worst=['low','LOW','No major model signal'];rows.forEach(function(r){var z=omRisk(r.vis,r.gust,r.precip,r.code,r.low);if(z[0]==='high'||(z[0]==='med'&&worst[0]==='low'))worst=z;});var html='<div class="assess '+worst[0]+'"><div><h2>'+esc(label)+' — 24-hour model risk: '+worst[1]+' <span class="srcbadge">Open-Meteo</span></h2><p>'+worst[2]+'. Model guidance only; verify against official METAR, TAF and advisories.</p></div></div><div class="slabel">Hourly model guidance</div><div class="fcards">';rows.filter(function(_,i){return i%3===0;}).forEach(function(r){var z=omRisk(r.vis,r.gust,r.precip,r.code,r.low);html+='<div class="fcard '+(z[0]==='high'?'ifr':z[0]==='med'?'mvfr':'vfr')+'"><div class="ftop"><div class="ftime">'+fmtZ(r.time)+'<small>Local model time</small></div><span class="abadge '+z[0]+'">'+z[1]+'</span></div><div class="fgrid"><div><div class="k">Wind</div><div class="v">'+esc(windStr(Math.round(r.dir),Math.round(r.spd),Math.round(r.gust)))+'</div></div><div><div class="k">Visibility</div><div class="v">'+(r.vis==null?'—':(r.vis/1609.344).toFixed(1)+' mi')+'</div></div><div><div class="k">Low cloud</div><div class="v">'+(r.low==null?'—':r.low+'%')+'</div></div><div><div class="k">Precip chance</div><div class="v">'+(r.pop==null?'—':r.pop+'%')+'</div></div></div><div class="action"><span>'+z[2]+(r.snow>0?' · Snow signal':'')+(r.fz!=null?' · Freezing level '+Math.round(r.fz*3.28084)+' ft':'')+'</span></div></div>';});html+='</div>';out.innerHTML=html;}).catch(function(e){btn.disabled=false;out.innerHTML='<div class="err-box"><b>Open-Meteo request failed.</b> '+esc(e.message)+'</div>';});
 }
 
 </script>
