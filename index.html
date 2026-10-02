@@ -30,6 +30,22 @@ h1{font-size:30px;line-height:1.2;margin:0;letter-spacing:-.01em}
 .field input::placeholder{text-transform:none;color:var(--text-2)}
 .field input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
 button.go{align-self:flex-end;min-height:44px;padding:0 22px;font-size:15px;font-weight:600;color:#fff;background:var(--blue);border:none;border-radius:8px;cursor:pointer;font-family:var(--sans)}
+
+/* Airport autocomplete */
+.airport-field{position:relative;min-width:280px}
+.airport-field input{padding-right:14px}
+.airport-results{display:none;position:absolute;z-index:30;left:0;right:0;top:76px;max-height:340px;overflow-y:auto;background:var(--canvas);border:1px solid var(--border);border-radius:10px;box-shadow:0 16px 40px rgba(0,0,0,.55);padding:6px}
+.airport-results.open{display:block}
+.airport-result{display:flex;width:100%;align-items:center;justify-content:space-between;gap:16px;text-align:left;padding:10px 11px;border:0;border-radius:7px;color:var(--text);background:transparent;cursor:pointer;font-family:var(--sans);min-height:52px}
+.airport-result:hover,.airport-result.active{background:var(--blue-soft);outline:1px solid var(--blue)}
+.airport-main{display:block;font-size:14px;font-weight:700;line-height:1.3}
+.airport-sub{display:block;margin-top:2px;color:var(--text-2);font-size:12px;font-weight:400}
+.airport-codes{font-family:var(--mono);font-size:12px;color:var(--blue);white-space:nowrap}
+.airport-empty{padding:14px;color:var(--text-2);font-size:13px}
+.airport-help{font-size:12px;color:var(--text-2);margin-top:0}
+.airport-help b{color:var(--text);font-weight:600}
+@media(max-width:540px){.airport-field{min-width:0}.airport-results{position:absolute;left:0;right:0;top:76px;max-height:46vh}.airport-result{padding:11px 10px}.airport-codes{font-size:11px}}
+
 button.go:hover{opacity:.9}
 button.go:disabled{opacity:.5;cursor:default}
 .keyinfo{font-size:13px;color:var(--text-2);background:var(--blue-soft);border:1px solid var(--blue);border-radius:8px;padding:10px 14px;margin-top:8px;line-height:1.6}
@@ -39,6 +55,21 @@ button.go:disabled{opacity:.5;cursor:default}
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .chip{font-size:13px;padding:5px 12px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);cursor:pointer;font-family:var(--sans)}
 .chip:hover{border-color:var(--blue);color:var(--blue)}
+
+/* Explainable decision support */
+.driver-line{display:flex;gap:8px;align-items:flex-start;margin:10px 0 0;padding:10px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;font-size:13px;color:var(--text-2)}
+.driver-line b{color:var(--text);white-space:nowrap}.driver-line span{color:var(--text)}
+.decision{margin-top:10px;border:1px solid var(--border);border-radius:9px;background:var(--soft);overflow:hidden}
+.decision summary{cursor:pointer;min-height:44px;display:flex;align-items:center;gap:8px;padding:10px 13px;color:var(--blue);font-size:13px;font-weight:700;list-style:none}
+.decision summary::-webkit-details-marker{display:none}.decision summary:before{content:'+';display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border:1px solid var(--blue);border-radius:5px;font-size:15px}.decision[open] summary:before{content:'−'}
+.decision[open] summary{border-bottom:1px solid var(--border)}
+.decision-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+.decision-col{padding:13px 14px;border-right:1px solid var(--border)}.decision-col:last-child{border-right:0}
+.decision-col h4{margin:0 0 6px;color:var(--text);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+.decision-col ul{margin:0;padding-left:17px;color:var(--text-2);font-size:12px;line-height:1.55}.decision-col li+li{margin-top:4px}
+.decision-gate{padding:10px 14px;border-top:1px solid var(--border);font-size:12px;color:var(--text-2);background:var(--canvas)}.decision-gate b{color:var(--text)}
+@media(max-width:700px){.decision-grid{grid-template-columns:1fr}.decision-col{border-right:0;border-bottom:1px solid var(--border)}.decision-col:last-child{border-bottom:0}.driver-line{display:block}.driver-line b{display:block;margin-bottom:2px}}
+
 /* States */
 .state{text-align:center;padding:48px 16px;color:var(--text-2);font-size:15px}
 .spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
@@ -106,7 +137,7 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--border);font-
 <div class="wrap">
   <div class="topbar">
     <h1>APR - Aviation Weather and Network Operations Decision Support</h1>
-    <span class="vbadge">v6.1 &mdash; Oct 2 2026</span>
+    <span class="vbadge">v6.3 &mdash; Oct 2 2026</span>
   </div>
   <p class="sub">Compare free weather providers and translate METAR, TAF and model guidance into explainable operational-risk signals.</p>
   <div class="keyinfo" style="margin-top:18px"><b>Decision support only.</b> This page identifies potential weather constraints. It does not confirm or authorize a delay, cancellation, diversion, aircraft swap, or network-plan change. Operational decisions must come from airline-authorized personnel and authoritative operational sources.</div>
@@ -141,16 +172,17 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--border);font-
 
   <!-- Automatic panel -->
   <div class="src-panel active" id="panel-auto">
-    <div class="sbar"><div class="field"><label for="apt-auto">Airport (ICAO code)</label><input id="apt-auto" class="icao" placeholder="e.g. CYTZ, KJFK, EGLL" autocomplete="off" maxlength="4" /></div><button class="go" id="go-auto">Get best available forecast</button></div>
+    <div class="sbar"><div class="field airport-field"><label for="apt-auto">Airport or city</label><input id="apt-auto" class="airport-input" placeholder="Search city, airport, IATA, or ICAO" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" /><div class="airport-results" id="results-auto" role="listbox"></div><span class="airport-help">Search the airport directory or <b>enter a 4-letter ICAO code</b>.</span></div><button class="go" id="go-auto">Get best available forecast</button></div>
     <p class="hint">Uses NOAA first, then AVWX or CheckWX when a saved free API key is available.</p><div class="chips" id="chips-auto"></div><div id="out-auto"></div>
   </div>
 
   <!-- NOAA panel -->
   <div class="src-panel active" id="panel-noaa">
     <div class="sbar">
-      <div class="field">
-        <label for="apt-noaa">Airport (ICAO code)</label>
-        <input id="apt-noaa" class="icao" placeholder="e.g. CYTZ, KJFK, EGLL" autocomplete="off" maxlength="4" />
+      <div class="field airport-field">
+        <label for="apt-noaa">Airport or city</label>
+        <input id="apt-noaa" class="airport-input" placeholder="Search city, airport, IATA, or ICAO" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" />
+        <div class="airport-results" id="results-noaa" role="listbox"></div><span class="airport-help">Search the airport directory or <b>enter a 4-letter ICAO code</b>.</span>
       </div>
       <button class="go" id="go-noaa">Get forecast</button>
     </div>
@@ -166,9 +198,10 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--border);font-
         <label for="key-cwx">CheckWX API Key <span id="keysaved-badge"></span></label>
         <input id="key-cwx" placeholder="Paste your free API key from checkwxapi.com" autocomplete="off" />
       </div>
-      <div class="field">
-        <label for="apt-cwx">Airport (ICAO code)</label>
-        <input id="apt-cwx" class="icao" placeholder="e.g. CYTZ, EGLL, VHHH" autocomplete="off" maxlength="4" />
+      <div class="field airport-field">
+        <label for="apt-cwx">Airport or city</label>
+        <input id="apt-cwx" class="airport-input" placeholder="Search city, airport, IATA, or ICAO" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" />
+        <div class="airport-results" id="results-cwx" role="listbox"></div><span class="airport-help">Search the airport directory or <b>enter a 4-letter ICAO code</b>.</span>
       </div>
       <button class="go" id="go-cwx">Get forecast</button>
     </div>
@@ -180,13 +213,13 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--border);font-
 
   <!-- AVWX panel -->
   <div class="src-panel" id="panel-avwx">
-    <div class="sbar"><div class="field" style="flex:2 1 260px"><label for="key-avwx">AVWX token <span id="avwxsaved-badge"></span></label><input id="key-avwx" placeholder="Paste your free AVWX token" autocomplete="off" /></div><div class="field"><label for="apt-avwx">Airport (ICAO code)</label><input id="apt-avwx" class="icao" placeholder="e.g. CYTZ, EGLL, VHHH" autocomplete="off" maxlength="4" /></div><button class="go" id="go-avwx">Get forecast</button></div>
+    <div class="sbar"><div class="field" style="flex:2 1 260px"><label for="key-avwx">AVWX token <span id="avwxsaved-badge"></span></label><input id="key-avwx" placeholder="Paste your free AVWX token" autocomplete="off" /></div><div class="field airport-field"><label for="apt-avwx">Airport or city</label><input id="apt-avwx" class="airport-input" placeholder="Search city, airport, IATA, or ICAO" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" /><div class="airport-results" id="results-avwx" role="listbox"></div><span class="airport-help">Search the airport directory or <b>enter a 4-letter ICAO code</b>.</span></div><button class="go" id="go-avwx">Get forecast</button></div>
     <div class="keyinfo">Create a free account and token at <a href="https://account.avwx.rest" target="_blank" rel="noopener">account.avwx.rest</a>. The token is stored only in this browser.</div><p class="hint" style="margin-top:12px">Quick picks:</p><div class="chips" id="chips-avwx"></div><div id="out-avwx"></div>
   </div>
 
   <!-- Open-Meteo panel -->
   <div class="src-panel" id="panel-om">
-    <div class="sbar"><div class="field"><label for="apt-om">Airport label</label><input id="apt-om" class="icao" placeholder="e.g. CYTZ" autocomplete="off" maxlength="8" /></div><div class="field"><label for="lat-om">Latitude</label><input id="lat-om" inputmode="decimal" placeholder="43.6275" /></div><div class="field"><label for="lon-om">Longitude</label><input id="lon-om" inputmode="decimal" placeholder="-79.3962" /></div><button class="go" id="go-om">Get model outlook</button></div>
+    <div class="sbar"><div class="field airport-field"><label for="apt-om">Airport or city</label><input id="apt-om" class="airport-input" placeholder="Search city, airport, IATA, or ICAO" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" /><div class="airport-results" id="results-om" role="listbox"></div><span class="airport-help">Selecting an airport fills its coordinates automatically.</span></div><div class="field"><label for="lat-om">Latitude</label><input id="lat-om" inputmode="decimal" placeholder="43.6275" /></div><div class="field"><label for="lon-om">Longitude</label><input id="lon-om" inputmode="decimal" placeholder="-79.3962" /></div><button class="go" id="go-om">Get model outlook</button></div>
     <div class="keyinfo"><b>Model guidance only.</b> Open-Meteo does not provide official METAR or TAF. Choose a quick pick or enter airport coordinates.</div><p class="hint" style="margin-top:12px">Quick picks:</p><div class="chips" id="chips-om"></div><div id="out-om"></div>
   </div>
   </div><!-- /workspace -->
@@ -206,7 +239,14 @@ footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--border);font-
 <script>
 var QUICK_NOAA=[['CYTZ','Toronto City'],['CYYZ','Toronto Pearson'],['KJFK','New York JFK'],['KBOS','Boston'],['KORD',"Chicago O'Hare"],['EGLL','London Heathrow']];
 var QUICK_CWX=[['CYTZ','Toronto City'],['CYYZ','Toronto Pearson'],['EGLL','London Heathrow'],['VHHH','Hong Kong'],['OMDB','Dubai'],['WSSS','Singapore']];
-var AIRPORTS={CYTZ:[43.6275,-79.3962,'Toronto City'],CYYZ:[43.6777,-79.6248,'Toronto Pearson'],KJFK:[40.6413,-73.7781,'New York JFK'],KBOS:[42.3656,-71.0096,'Boston'],KORD:[41.9742,-87.9073,"Chicago O'Hare"],EGLL:[51.4700,-0.4543,'London Heathrow'],VHHH:[22.3080,113.9185,'Hong Kong'],OMDB:[25.2532,55.3657,'Dubai'],WSSS:[1.3644,103.9915,'Singapore']};
+var AIRPORT_INDEX=[
+['Toronto','Billy Bishop Toronto City','YTZ','CYTZ','Canada',43.6275,-79.3962],['Toronto','Toronto Pearson International','YYZ','CYYZ','Canada',43.6777,-79.6248],['Montreal','Montréal–Trudeau International','YUL','CYUL','Canada',45.4706,-73.7408],['Vancouver','Vancouver International','YVR','CYVR','Canada',49.1967,-123.1815],['Calgary','Calgary International','YYC','CYYC','Canada',51.1139,-114.0203],['Ottawa','Ottawa International','YOW','CYOW','Canada',45.3225,-75.6692],['Halifax','Halifax Stanfield International','YHZ','CYHZ','Canada',44.8808,-63.5086],
+['New York','John F. Kennedy International','JFK','KJFK','United States',40.6413,-73.7781],['New York','LaGuardia','LGA','KLGA','United States',40.7769,-73.8740],['Newark','Newark Liberty International','EWR','KEWR','United States',40.6895,-74.1745],['Boston','Boston Logan International','BOS','KBOS','United States',42.3656,-71.0096],['Chicago','Chicago O’Hare International','ORD','KORD','United States',41.9742,-87.9073],['Atlanta','Hartsfield–Jackson Atlanta International','ATL','KATL','United States',33.6407,-84.4277],['Dallas','Dallas Fort Worth International','DFW','KDFW','United States',32.8998,-97.0403],['Los Angeles','Los Angeles International','LAX','KLAX','United States',33.9416,-118.4085],['San Francisco','San Francisco International','SFO','KSFO','United States',37.6213,-122.3790],['Seattle','Seattle–Tacoma International','SEA','KSEA','United States',47.4502,-122.3088],['Miami','Miami International','MIA','KMIA','United States',25.7959,-80.2870],['Denver','Denver International','DEN','KDEN','United States',39.8561,-104.6737],['Washington','Washington Dulles International','IAD','KIAD','United States',38.9531,-77.4565],['Washington','Ronald Reagan Washington National','DCA','KDCA','United States',38.8512,-77.0402],['Philadelphia','Philadelphia International','PHL','KPHL','United States',39.8744,-75.2424],['Detroit','Detroit Metropolitan','DTW','KDTW','United States',42.2162,-83.3554],['Las Vegas','Harry Reid International','LAS','KLAS','United States',36.0840,-115.1537],['Orlando','Orlando International','MCO','KMCO','United States',28.4312,-81.3081],
+['London','London Heathrow','LHR','EGLL','United Kingdom',51.4700,-0.4543],['London','London Gatwick','LGW','EGKK','United Kingdom',51.1537,-0.1821],['Paris','Paris Charles de Gaulle','CDG','LFPG','France',49.0097,2.5479],['Amsterdam','Amsterdam Schiphol','AMS','EHAM','Netherlands',52.3105,4.7683],['Frankfurt','Frankfurt Airport','FRA','EDDF','Germany',50.0379,8.5622],['Munich','Munich Airport','MUC','EDDM','Germany',48.3538,11.7861],['Madrid','Adolfo Suárez Madrid–Barajas','MAD','LEMD','Spain',40.4983,-3.5676],['Barcelona','Barcelona–El Prat','BCN','LEBL','Spain',41.2974,2.0833],['Rome','Rome Fiumicino','FCO','LIRF','Italy',41.8003,12.2389],['Zurich','Zurich Airport','ZRH','LSZH','Switzerland',47.4581,8.5555],['Vienna','Vienna International','VIE','LOWW','Austria',48.1103,16.5697],['Dublin','Dublin Airport','DUB','EIDW','Ireland',53.4264,-6.2499],['Istanbul','Istanbul Airport','IST','LTFM','Türkiye',41.2753,28.7519],
+['Hong Kong','Hong Kong International','HKG','VHHH','Hong Kong',22.3080,113.9185],['Singapore','Singapore Changi','SIN','WSSS','Singapore',1.3644,103.9915],['Tokyo','Tokyo Haneda','HND','RJTT','Japan',35.5494,139.7798],['Tokyo','Narita International','NRT','RJAA','Japan',35.7720,140.3929],['Seoul','Incheon International','ICN','RKSI','South Korea',37.4602,126.4407],['Beijing','Beijing Capital International','PEK','ZBAA','China',40.0799,116.6031],['Shanghai','Shanghai Pudong International','PVG','ZSPD','China',31.1443,121.8083],['Delhi','Indira Gandhi International','DEL','VIDP','India',28.5562,77.1000],['Mumbai','Chhatrapati Shivaji Maharaj International','BOM','VABB','India',19.0896,72.8656],['Bengaluru','Kempegowda International','BLR','VOBL','India',13.1986,77.7066],['Dubai','Dubai International','DXB','OMDB','United Arab Emirates',25.2532,55.3657],['Doha','Hamad International','DOH','OTHH','Qatar',25.2731,51.6081],['Bangkok','Suvarnabhumi','BKK','VTBS','Thailand',13.6900,100.7501],['Kuala Lumpur','Kuala Lumpur International','KUL','WMKK','Malaysia',2.7456,101.7072],['Manila','Ninoy Aquino International','MNL','RPLL','Philippines',14.5086,121.0198],
+['Sydney','Sydney Kingsford Smith','SYD','YSSY','Australia',-33.9399,151.1753],['Melbourne','Melbourne Airport','MEL','YMML','Australia',-37.6690,144.8410],['Brisbane','Brisbane Airport','BNE','YBBN','Australia',-27.3842,153.1175],['Auckland','Auckland Airport','AKL','NZAA','New Zealand',-37.0082,174.7850],['Johannesburg','O. R. Tambo International','JNB','FAOR','South Africa',-26.1337,28.2420],['Cape Town','Cape Town International','CPT','FACT','South Africa',-33.9700,18.5972],['Cairo','Cairo International','CAI','HECA','Egypt',30.1219,31.4056]
+].map(function(a){return{city:a[0],name:a[1],iata:a[2],icao:a[3],country:a[4],lat:a[5],lon:a[6]};});
+var AIRPORTS={};AIRPORT_INDEX.forEach(function(a){AIRPORTS[a.icao]=[a.lat,a.lon,a.city+' '+a.name];});
 var AVWX_API='https://avwx.rest/api';
 var OM_API='https://api.open-meteo.com/v1/forecast';
 var NOAA_API='https://aviationweather.gov/api/data';
@@ -231,6 +271,38 @@ function switchTab(t){
   localStorage.setItem('wx_provider',t);
 }
 
+/* ---- Airport search ---- */
+var AIRPORT_INPUTS=['apt-auto','apt-noaa','apt-avwx','apt-cwx','apt-om'];
+var AIRPORT_RUN={"apt-auto":runAuto,"apt-noaa":runNoaa,"apt-avwx":runAvwx,"apt-cwx":runCwx,"apt-om":runOpenMeteo};
+function airportDisplay(a){return a.city+' — '+a.name+' ('+a.iata+' / '+a.icao+')';}
+function airportByCode(code){code=(code||'').toUpperCase();return AIRPORT_INDEX.find(function(a){return a.icao===code||a.iata===code;});}
+function airportMatches(q){
+  q=(q||'').trim().toLowerCase();
+  var rows=AIRPORT_INDEX.map(function(a){var vals=[a.iata,a.icao,a.city,a.name,a.country].map(function(v){return v.toLowerCase();});var score=9;if(!q)score=8;else if(vals[0]===q||vals[1]===q)score=0;else if(vals[2]===q)score=1;else if(vals.some(function(v){return v.indexOf(q)===0;}))score=2;else if(vals.some(function(v){return v.indexOf(q)>=0;}))score=4;return{a:a,score:score};}).filter(function(x){return x.score<9;});
+  rows.sort(function(x,y){return x.score-y.score||x.a.city.localeCompare(y.a.city);});return rows.slice(0,8).map(function(x){return x.a;});
+}
+function recentAirports(){try{return JSON.parse(localStorage.getItem('wx_recent_airports')||'[]').map(airportByCode).filter(Boolean).slice(0,6);}catch(e){return[];}}
+function saveRecent(a){var x=[a.icao].concat(recentAirports().map(function(r){return r.icao;})).filter(function(v,i,z){return z.indexOf(v)===i;}).slice(0,6);localStorage.setItem('wx_recent_airports',JSON.stringify(x));localStorage.setItem('wx_last_airport',a.icao);}
+function selectAirport(a,sourceId){
+  if(!a)return;AIRPORT_INPUTS.forEach(function(id){var el=document.getElementById(id);el.value=airportDisplay(a);el.dataset.icao=a.icao;el.dataset.iata=a.iata;});
+  document.getElementById('lat-om').value=a.lat;document.getElementById('lon-om').value=a.lon;saveRecent(a);
+  document.querySelectorAll('.airport-results').forEach(function(r){r.classList.remove('open');});document.querySelectorAll('.airport-input').forEach(function(i){i.setAttribute('aria-expanded','false');});
+}
+function getAirportCode(id){var el=document.getElementById(id),raw=el.value.trim().toUpperCase();if(el.dataset.icao)return el.dataset.icao;var direct=airportByCode(raw);return direct?direct.icao:raw;}
+function attachAirportSearch(id){
+  var input=document.getElementById(id),box=document.getElementById('results-'+id.split('-')[1]),active=-1,shown=[];
+  function draw(q){shown=q?airportMatches(q):recentAirports();if(!q&&!shown.length)shown=['CYYZ','CYTZ','KJFK','EGLL','OMDB','WSSS'].map(airportByCode);active=-1;box.innerHTML='';
+    if(!shown.length){box.innerHTML='<div class="airport-empty">No directory match. You can still enter a 4-letter ICAO code.</div>';}else shown.forEach(function(a,i){var b=document.createElement('button');b.type='button';b.className='airport-result';b.setAttribute('role','option');b.innerHTML='<span><span class="airport-main">'+esc(a.city)+' — '+esc(a.name)+'</span><span class="airport-sub">'+esc(a.country)+'</span></span><span class="airport-codes">'+esc(a.iata)+' / '+esc(a.icao)+'</span>';b.addEventListener('mousedown',function(e){e.preventDefault();selectAirport(a,id);input.focus();});box.appendChild(b);});
+    box.classList.add('open');input.setAttribute('aria-expanded','true');
+  }
+  input.addEventListener('focus',function(){draw(input.dataset.icao?'':input.value);});
+  input.addEventListener('input',function(){delete input.dataset.icao;delete input.dataset.iata;if(id==='apt-om'){document.getElementById('lat-om').value='';document.getElementById('lon-om').value='';}draw(input.value);});
+  input.addEventListener('keydown',function(e){var buttons=box.querySelectorAll('.airport-result');if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(!box.classList.contains('open'))draw(input.value);buttons=box.querySelectorAll('.airport-result');if(!buttons.length)return;active=(active+(e.key==='ArrowDown'?1:-1)+buttons.length)%buttons.length;buttons.forEach(function(b,i){b.classList.toggle('active',i===active);});buttons[active].scrollIntoView({block:'nearest'});}else if(e.key==='Enter'){e.preventDefault();e.stopImmediatePropagation();if(active>=0&&shown[active])selectAirport(shown[active],id);else{var m=airportMatches(input.value);if(m.length&&(input.value.trim().length>2))selectAirport(m[0],id);}box.classList.remove('open');input.setAttribute('aria-expanded','false');AIRPORT_RUN[id]();}else if(e.key==='Escape'){box.classList.remove('open');input.setAttribute('aria-expanded','false');}});
+}
+AIRPORT_INPUTS.forEach(attachAirportSearch);
+document.addEventListener('mousedown',function(e){if(!e.target.closest('.airport-field'))document.querySelectorAll('.airport-results').forEach(function(r){r.classList.remove('open');});});
+var lastAirport=airportByCode(localStorage.getItem('wx_last_airport')||'');if(lastAirport)selectAirport(lastAirport);
+
 /* ---- Quick pick chips ---- */
 function buildChips(arr,inputId,runFn){
   var el=document.getElementById('chips-'+inputId.split('-')[1]);
@@ -238,7 +310,7 @@ function buildChips(arr,inputId,runFn){
     var c=document.createElement('button');
     c.className='chip';
     c.textContent=item[0]+' \u00b7 '+item[1];
-    c.onclick=function(){document.getElementById(inputId).value=item[0];runFn();};
+    c.onclick=function(){var a=airportByCode(item[0]);if(a)selectAirport(a,inputId);else document.getElementById(inputId).value=item[0];runFn();};
     el.appendChild(c);
   });
 }
@@ -246,7 +318,7 @@ buildChips(QUICK_NOAA,'apt-auto',runAuto);
 buildChips(QUICK_NOAA,'apt-noaa',runNoaa);
 buildChips(QUICK_CWX,'apt-cwx',runCwx);
 buildChips(QUICK_CWX,'apt-avwx',runAvwx);
-(function(){var el=document.getElementById('chips-om');Object.keys(AIRPORTS).slice(0,6).forEach(function(code){var a=AIRPORTS[code],b=document.createElement('button');b.className='chip';b.textContent=code+' · '+a[2];b.onclick=function(){document.getElementById('apt-om').value=code;document.getElementById('lat-om').value=a[0];document.getElementById('lon-om').value=a[1];runOpenMeteo();};el.appendChild(b);});})();
+(function(){var el=document.getElementById('chips-om');Object.keys(AIRPORTS).slice(0,6).forEach(function(code){var a=AIRPORTS[code],b=document.createElement('button');b.className='chip';b.textContent=code+' · '+a[2];b.onclick=function(){selectAirport(airportByCode(code),'apt-om');runOpenMeteo();};el.appendChild(b);});})();
 
 /* ---- API key persistence ---- */
 var savedKey=localStorage.getItem('cwx_key')||'';
@@ -330,12 +402,49 @@ function windStr(dir,spd,gst){
 function getAction(ct,spd,gst,wx){
   var haz=wx.filter(function(w){return w.severe;}).map(function(w){return w.label;});
   var hw=(gst&&gst>=30)||(spd&&spd>=25);
-  if(ct==='LIFR')return{cls:'high',lbl:'HIGH RISK',txt:'<b>High operational constraint risk.</b> Review airport acceptance rate, approach availability, aircraft limits, alternate requirements, and network recovery options.'};
-  if(ct==='IFR')return{cls:'high',lbl:'ELEVATED',txt:'<b>Elevated operational constraint risk.</b> Review arrival/departure capacity, active flow restrictions, schedule buffer, and the airline-approved station playbook.'};
-  if(hw||haz.length){var list=haz.concat(hw?['strong winds/gusts']:[]);return{cls:'med',lbl:'MONITOR',txt:'<b>Monitor operational exposure.</b> '+list.join(', ')+' detected. Review NOTAMs, runway/de-icing/ramp capability, and airline-approved limits.'}}
-  if(ct==='MVFR')return{cls:'med',lbl:'MARGINAL',txt:'<b>Marginal conditions.</b> Monitor the trend and compare it with the airline station profile; no operational decision is implied.'};
-  return{cls:'low',lbl:'CLEAR',txt:'<b>No weather constraint indicated by this source.</b> Continue normal operational monitoring and verify authoritative notices.'};
+  if(ct==='LIFR')return{cls:'high',lbl:'HIGH RISK',txt:'<b>High operational constraint risk.</b> Immediate operational review is warranted; this is not an automatic delay, cancellation, or diversion decision.'};
+  if(ct==='IFR')return{cls:'high',lbl:'ELEVATED',txt:'<b>Elevated operational constraint risk.</b> Review capacity, approach availability, schedule resilience, and the airline-approved station playbook.'};
+  if(hw||haz.length){var list=haz.concat(hw?['strong winds/gusts']:[]);return{cls:'med',lbl:'MONITOR',txt:'<b>Hazard signal detected.</b> '+list.join(', ')+'. Open the decision-support detail for operational checks.'}}
+  if(ct==='MVFR')return{cls:'med',lbl:'MARGINAL',txt:'<b>Marginal conditions.</b> Monitor the trend and assess schedule buffer; no operational decision is implied.'};
+  return{cls:'low',lbl:'CLEAR',txt:'<b>No material weather constraint indicated by this source.</b> Continue routine monitoring and verify authoritative notices.'};
 }
+function normalizedClouds(clouds,raw){
+  var out=(clouds||[]).map(function(c){var cover=(c.cover||c.code||c.type||c.repr||'').toUpperCase();var v=c.base;if(v==null)v=c.base_feet_agl;if(v==null){var a=c.altitude;v=a&&a.value!=null?a.value*100:(typeof a==='number'?a*100:parseFloat(a&&a.repr!=null?a.repr:a)*100);}v=Number(v);return{cover:cover,code:cover,base:isFinite(v)?v:null};});
+  var hasCeiling=out.some(function(c){return['BKN','OVC','OVX','VV'].indexOf(c.cover)>=0&&c.base!=null;});
+  if(!hasCeiling&&raw){var re=/\b(FEW|SCT|BKN|OVC|VV)(\d{3}|\/\/\/)/g,m;while((m=re.exec(String(raw).toUpperCase()))){out.push({cover:m[1],code:m[1],base:m[2]==='///'?null:parseInt(m[2],10)*100});}}
+  return out;
+}
+function conditionDrivers(x){
+  var reasons=[],derived=calcCat(x.ceil===Infinity?null:x.ceil,x.vis),wxText=(x.wx||[]).map(function(w){return(w.code+' '+w.label).toUpperCase();}).join(' ');
+  if(x.ceil!==Infinity){if(x.ceil<500)reasons.push('Ceiling '+x.ceil.toLocaleString()+' ft supports LIFR');else if(x.ceil<1000)reasons.push('Ceiling '+x.ceil.toLocaleString()+' ft supports IFR');else if(x.ceil<=3000)reasons.push('Ceiling '+x.ceil.toLocaleString()+' ft supports MVFR');}
+  if(x.vis!=null){if(x.vis<1)reasons.push('Visibility '+x.vis+' mi supports LIFR');else if(x.vis<3)reasons.push('Visibility '+x.vis+' mi supports IFR');else if(x.vis<=5)reasons.push('Visibility '+x.vis+' mi supports MVFR');}
+  if(rank(x.ct)>rank(derived))reasons.push('Provider classified this period '+x.ct+'; displayed values may be rounded or omit a controlling element');
+  if((x.wgst&&x.wgst>=30)||(x.wspd&&x.wspd>=25))reasons.push('Strong wind signal'+(x.wgst?' with gusts to '+x.wgst+' kt':' at '+x.wspd+' kt'));
+  if(wxText.indexOf('THUNDER')>=0||wxText.indexOf('TS')>=0)reasons.push('Thunderstorm signal');
+  if(wxText.indexOf('FREEZ')>=0||wxText.indexOf('FZ')>=0)reasons.push('Freezing precipitation signal');
+  if(wxText.indexOf('SNOW')>=0||wxText.indexOf('SN')>=0)reasons.push('Snow or blowing-snow signal');
+  if(wxText.indexOf('FOG')>=0||wxText.indexOf('FG')>=0||wxText.indexOf('MIST')>=0||wxText.indexOf('BR')>=0)reasons.push('Fog or mist signal');
+  if(!reasons.length)reasons.push(x.ct+' category reported; no additional threshold driver identified in the displayed fields');return reasons;
+}
+function decisionProfile(x){
+  var wxText=(x.wx||[]).map(function(w){return(w.code+' '+w.label).toUpperCase();}).join(' '),effects=[],checks=[],planning=[];
+  if(x.ct==='IFR'||x.ct==='LIFR'){effects.push('Reduced arrival/departure acceptance rate or added spacing');effects.push('Greater dependence on available instrument approaches and runway configuration');}
+  else if(x.ct==='MVFR'){effects.push('Lower schedule buffer if conditions deteriorate');effects.push('Possible arrival spacing or approach-sequencing impacts');}
+  else effects.push('No category-based capacity constraint identified');
+  if(x.vis!=null&&x.vis<=5)effects.push('Reduced-visibility surface and approach considerations');
+  if((x.wgst&&x.wgst>=30)||(x.wspd&&x.wspd>=25))effects.push('Runway crosswind/tailwind and ramp-exposure considerations');
+  if(/TS|THUNDER/.test(wxText))effects.push('Potential reroutes, ground stops, ramp restrictions, or convective avoidance');
+  if(/FZ|FREEZ|SN|SNOW/.test(wxText))effects.push('Possible de-icing, runway-treatment, and turnaround impacts');
+  checks.push('Latest METAR/SPECI, TAF trend, NOTAMs, and active ATC/flow restrictions');checks.push('Runway configuration, approach availability, and airport acceptance rate');checks.push('Aircraft/operator limits, alternate requirements, fuel, and crew constraints');
+  if(/FZ|FREEZ|SN|SNOW/.test(wxText))checks.push('De-icing, runway-treatment, and station winter capability');
+  if(/TS|THUNDER/.test(wxText)||(x.wgst&&x.wgst>=30))checks.push('Ramp restrictions and local lightning/wind procedures');
+  planning.push('Monitor the next observation and compare actual conditions with the forecast trend');planning.push('Coordinate dispatch/NOC, station operations, and network control using the approved playbook');
+  if(x.ct==='IFR'||x.ct==='LIFR'){planning.push('Review schedule buffer, alternates, recovery options, and downstream aircraft/crew exposure');planning.push('Prepare passenger-recovery options if authorized operational actions become necessary');}else planning.push('Maintain normal monitoring; avoid treating this signal as a confirmed disruption');
+  return{reasons:conditionDrivers(x),effects:effects,checks:checks,planning:planning};
+}
+function listHtml(items){return'<ul>'+items.map(function(v){return'<li>'+esc(v)+'</li>';}).join('')+'</ul>';}
+function decisionHtml(x,label){var d=decisionProfile(x);return'<div class="driver-line"><b>Why flagged:</b><span>'+d.reasons.map(esc).join(' · ')+'</span></div><details class="decision"><summary>'+esc(label||'Review decision-support detail')+'</summary><div class="decision-grid"><div class="decision-col"><h4>Potential operational effects</h4>'+listHtml(d.effects)+'</div><div class="decision-col"><h4>Verify before acting</h4>'+listHtml(d.checks)+'</div><div class="decision-col"><h4>Planning considerations</h4>'+listHtml(d.planning)+'</div></div><div class="decision-gate"><b>Decision gate:</b> Airline-authorized personnel must confirm any delay, cancellation, diversion, aircraft swap, or network-plan change using authoritative operational sources and approved procedures.</div></details>';}
+
 function rank(ct){return{VFR:0,MVFR:1,IFR:2,LIFR:3}[ct]||0;}
 
 /* IROP flag detector */
@@ -367,7 +476,7 @@ function render(id,metar,taf,outId,srcLabel){
   var periods=[];
   if(taf&&Array.isArray(taf.fcsts)){
     periods=taf.fcsts.map(function(f){
-      var ceil=ceilFt(f.clouds),vis=visMi(f.visib);
+      var fclouds=normalizedClouds(f.clouds,f.raw||f.raw_text||''),ceil=ceilFt(fclouds),vis=visMi(f.visib);
       var wx=f.wxArr||wxDecode(f.wxString||'');
       return{from:f.timeFrom||f.timeBec||null,to:f.timeTo||null,change:f.fcstChange||null,prob:f.probability||null,ct:f.ct||calcCat(ceil===Infinity?null:ceil,vis),ceil:ceil,vis:vis,wx:wx,wdir:f.wdir,wspd:f.wspd,wgst:f.wgst};
     });
@@ -378,7 +487,8 @@ function render(id,metar,taf,outId,srcLabel){
   var metarWx=metar?(metar.wxArr||wxDecode(metar.wxString||'')):[];
   var metarSpd=metar?metar.wspd:null,metarGst=metar?metar.wgst:null,metarVis=metar?visMi(metar.visib):null;
   var flags=iropFlags(metarWx,metarSpd,metarGst,metar?metar.fltCat:'VFR',metarVis);
-  var oa=getAction(worst,null,null,[]);
+  var worstPeriods=periods.filter(function(p){return p.ct===worst;}),aggSpd=null,aggGst=null,aggWx=[];worstPeriods.forEach(function(p){if(p.wspd!=null&&(aggSpd==null||p.wspd>aggSpd))aggSpd=p.wspd;if(p.wgst!=null&&(aggGst==null||p.wgst>aggGst))aggGst=p.wgst;aggWx=aggWx.concat(p.wx||[]);});
+  var oa=getAction(worst,aggSpd,aggGst,aggWx);
   var html='<div class="assess '+oa.cls+'">'
     +'<div><h2>'+esc(name)+' \u2014 Worst forecast category: '+worst+' <span class="srcbadge">via '+esc(srcLabel)+'</span></h2>'
     +'<p>'+oa.txt+'</p>'
@@ -387,7 +497,7 @@ function render(id,metar,taf,outId,srcLabel){
     +'<div class="keyinfo"><b>How this was determined:</b> the banner selects the worst category across the latest METAR/SPECI and all returned TAF periods. Category order is VFR → MVFR → IFR → LIFR. This is a weather-risk summary, not an airline operational decision.</div>';
   html+='<h3 class="sn">'+esc(name)+' <span style="color:var(--text-2);font-weight:400">('+esc(id)+')</span></h3>';
   if(metar){
-    var ceil=ceilFt(metar.clouds),vis=visMi(metar.visib);
+    var mclouds=normalizedClouds(metar.clouds,metar.rawOb||metar.raw_text||''),ceil=ceilFt(mclouds),vis=visMi(metar.visib);
     var ct=metar.fltCat||calcCat(ceil===Infinity?null:ceil,vis);
     html+='<div class="slabel">Current conditions (METAR) \u2014 observed '+fmtZ(metar.reportTime||metar.obsTime||metar.observed)+'</div>';
     html+='<div style="margin-bottom:10px"><span class="cat '+ct.toLowerCase()+'">'+ct+'</span></div>';
@@ -397,6 +507,7 @@ function render(id,metar,taf,outId,srcLabel){
       +mbox('Ceiling',ceil===Infinity?'None':String(ceil.toLocaleString()),ceil===Infinity?'':'ft')
       +mbox('Temp',metar.temp==null?'\u2014':String(Math.round(metar.temp)),'\u00b0C')
       +'</div>';
+    html+=decisionHtml({ct:ct,ceil:ceil,vis:vis,wdir:metar.wdir,wspd:metar.wspd,wgst:metar.wgst,wx:metarWx},'Review current-condition decision support');
     if(metarWx.length)html+='<div class="wtags">'+metarWx.map(function(w){return'<span class="wtag'+(w.severe?' risk':'')+'">'+esc(w.label)+'</span>';}).join('')+'</div>';
     if(metar.remarks_decoded&&metar.remarks_decoded.length){
       html+='<div class="remarks"><details><summary>Decoded remarks ('+metar.remarks_decoded.length+')</summary><ul>'
@@ -428,6 +539,7 @@ function fcard(p){
     +'<div><div class="k">Ceiling</div><div class="v">'+(p.ceil===Infinity?'None':p.ceil.toLocaleString()+' ft')+'</div></div>'
     +'</div>'
     +'<div class="action"><span class="abadge '+act.cls+'">'+esc(act.lbl)+'</span><span>'+act.txt+'</span></div>'
+    +decisionHtml({ct:p.ct,ceil:p.ceil,vis:p.vis,wdir:p.wdir,wspd:p.wspd,wgst:p.wgst,wx:p.wx},'Expand operational checks and planning suggestions')
     +'</div>';
 }
 
@@ -452,7 +564,7 @@ function tryFetch(target,s,cb){
   x.send();
 }
 function runNoaa(){
-  var id=document.getElementById('apt-noaa').value.trim().toUpperCase();
+  var id=getAirportCode('apt-noaa');
   if(!id){document.getElementById('apt-noaa').focus();return;}
   var btn=document.getElementById('go-noaa');
   btn.disabled=true;
@@ -514,7 +626,7 @@ function normCwxTaf(d){
   return{name:t.name,icao:t.icao,raw_text:t.raw_text,issued:t.issued,fcsts:fcsts};
 }
 function runCwx(){
-  var id=document.getElementById('apt-cwx').value.trim().toUpperCase();
+  var id=getAirportCode('apt-cwx');
   var key=document.getElementById('key-cwx').value.trim();
   var out=document.getElementById('out-cwx');
   if(!id){document.getElementById('apt-cwx').focus();return;}
@@ -542,12 +654,12 @@ function avwxFetch(kind,id,key,cb){
   x.onload=function(){if(x.status===401||x.status===403){cb(new Error('invalid_key'));return;}if(x.status>=200&&x.status<300){try{cb(null,JSON.parse(x.responseText));}catch(e){cb(e);}}else cb(new Error('status '+x.status));};x.onerror=function(){cb(new Error('network'));};x.ontimeout=function(){cb(new Error('timeout'));};x.send();
 }
 function av(v){return v&&v.value!=null?v.value:null;}
-function normAvwxClouds(a){return(a||[]).map(function(c){return{cover:c.type||c.repr||'',base:av(c.altitude)!=null?av(c.altitude)*100:null};});}
+function normAvwxClouds(a){return(a||[]).map(function(c){var raw=c.altitude,alt=raw&&raw.value!=null?raw.value:(typeof raw==='number'?raw:parseFloat(raw&&raw.repr!=null?raw.repr:raw));return{cover:c.type||c.repr||'',base:isFinite(alt)?alt*100:null};});}
 function normAvwxWx(a){return(a||[]).map(function(w){var z=w.value||w.repr||'';return wxDecode(z)[0]||{label:z,severe:false,code:z};});}
 function normAvwxMetar(m){if(!m)return null;var clouds=normAvwxClouds(m.clouds);return{name:(m.station&&m.station.name)||m.station||'',fltCat:m.flight_rules||calcCat(ceilFt(clouds),av(m.visibility)),wdir:av(m.wind_direction),wspd:av(m.wind_speed),wgst:av(m.wind_gust),visib:av(m.visibility),clouds:clouds,wxArr:normAvwxWx(m.wx_codes),temp:av(m.temperature),rawOb:m.raw,observed:m.time&&m.time.dt,remarks_decoded:[]};}
 function normAvwxTaf(t){if(!t)return null;return{name:(t.station&&t.station.name)||t.station||'',raw_text:t.raw,issued:t.time&&t.time.dt,fcsts:(t.forecast||[]).map(function(f){var clouds=normAvwxClouds(f.clouds);return{timeFrom:f.start_time&&f.start_time.dt,timeTo:f.end_time&&f.end_time.dt,wdir:av(f.wind_direction),wspd:av(f.wind_speed),wgst:av(f.wind_gust),visib:av(f.visibility),clouds:clouds,wxArr:normAvwxWx(f.wx_codes),fcstChange:f.type||null,probability:null,ct:f.flight_rules||calcCat(ceilFt(clouds),av(f.visibility))};})};}
 function runAvwx(){
-  var id=document.getElementById('apt-avwx').value.trim().toUpperCase(),key=document.getElementById('key-avwx').value.trim(),out=document.getElementById('out-avwx'),btn=document.getElementById('go-avwx');
+  var id=getAirportCode('apt-avwx'),key=document.getElementById('key-avwx').value.trim(),out=document.getElementById('out-avwx'),btn=document.getElementById('go-avwx');
   if(!id){document.getElementById('apt-avwx').focus();return;}if(!key){out.innerHTML='<div class="err-box"><b>AVWX token required.</b> Create a free token at account.avwx.rest.</div>';return;}
   btn.disabled=true;out.innerHTML='<div class="state"><div class="spinner"></div>Fetching AVWX data for '+esc(id)+'&hellip;</div>';var done=0,metar=null,taf=null,keyErr=false;
   function finish(e){done++;if(e&&(e.message==='invalid_key'))keyErr=true;if(done<2)return;btn.disabled=false;if(keyErr){out.innerHTML='<div class="err-box"><b>Invalid AVWX token.</b> Check the saved token and try again.</div>';return;}if(!metar&&!taf){out.innerHTML='<div class="err-box"><b>AVWX returned no data for '+esc(id)+'.</b></div>';return;}render(id,metar,taf,'out-avwx','AVWX');}
@@ -556,7 +668,7 @@ function runAvwx(){
 
 /* ---- Automatic fallback ---- */
 function runAuto(){
-  var id=document.getElementById('apt-auto').value.trim().toUpperCase(),out=document.getElementById('out-auto'),btn=document.getElementById('go-auto');if(!id){document.getElementById('apt-auto').focus();return;}
+  var id=getAirportCode('apt-auto'),out=document.getElementById('out-auto'),btn=document.getElementById('go-auto');if(!id){document.getElementById('apt-auto').focus();return;}
   btn.disabled=true;out.innerHTML='<div class="state"><div class="spinner"></div>Trying NOAA for '+esc(id)+'&hellip;</div>';var done=0,m=null,t=null;
   function first(){done++;if(done<2)return;if(m||t){btn.disabled=false;render(id,m,t,'out-auto','NOAA · automatic');return;}var ak=localStorage.getItem('avwx_key')||'';if(ak){out.innerHTML='<div class="state"><div class="spinner"></div>NOAA unavailable. Trying AVWX&hellip;</div>';var n=0,am=null,at=null;function af(){n++;if(n<2)return;if(am||at){btn.disabled=false;render(id,am,at,'out-auto','AVWX fallback');}else tryCwx();}avwxFetch('metar',id,ak,function(e,d){if(!e)am=normAvwxMetar(d);af();});avwxFetch('taf',id,ak,function(e,d){if(!e)at=normAvwxTaf(d);af();});}else tryCwx();}
   function tryCwx(){var ck=localStorage.getItem('cwx_key')||'';if(!ck){btn.disabled=false;out.innerHTML='<div class="err-box"><b>NOAA was unavailable.</b> Save a free AVWX or CheckWX key to enable automatic fallback.</div>';return;}out.innerHTML='<div class="state"><div class="spinner"></div>Trying CheckWX fallback&hellip;</div>';var n=0,cm=null,ct=null;function cf(){n++;if(n<2)return;btn.disabled=false;if(cm||ct)render(id,cm,ct,'out-auto','CheckWX fallback');else out.innerHTML='<div class="err-box"><b>All configured providers failed.</b> Wait a moment and try again.</div>';}cwxFetch('/metar/'+encodeURIComponent(id)+'/decoded',ck,function(e,d){if(!e)cm=normCwxMetar(d);cf();});cwxFetch('/taf/'+encodeURIComponent(id)+'/decoded',ck,function(e,d){if(!e)ct=normCwxTaf(d);cf();});}
@@ -566,7 +678,7 @@ function runAuto(){
 /* ---- Open-Meteo model guidance ---- */
 function omRisk(vis,gust,precip,code,low){if(vis<1000||gust>=40||[95,96,97,99].indexOf(code)>=0)return['high','HIGH','Severe model constraint signal'];if(vis<5000||gust>=30||precip>0.5||code>=71||low>=90)return['med','MONITOR','Potential operational constraint'];return['low','LOW','No major model constraint signal'];}
 function runOpenMeteo(){
-  var label=document.getElementById('apt-om').value.trim().toUpperCase()||'LOCATION',lat=parseFloat(document.getElementById('lat-om').value),lon=parseFloat(document.getElementById('lon-om').value),out=document.getElementById('out-om'),btn=document.getElementById('go-om');if(!isFinite(lat)||!isFinite(lon)){out.innerHTML='<div class="err-box"><b>Coordinates required.</b> Choose a quick pick or enter latitude and longitude.</div>';return;}
+  var label=getAirportCode('apt-om')||'LOCATION',lat=parseFloat(document.getElementById('lat-om').value),lon=parseFloat(document.getElementById('lon-om').value),out=document.getElementById('out-om'),btn=document.getElementById('go-om');if(!isFinite(lat)||!isFinite(lon)){out.innerHTML='<div class="err-box"><b>Coordinates required.</b> Choose a quick pick or enter latitude and longitude.</div>';return;}
   btn.disabled=true;out.innerHTML='<div class="state"><div class="spinner"></div>Fetching Open-Meteo model guidance&hellip;</div>';var vars='visibility,cloud_cover_low,wind_speed_10m,wind_direction_10m,wind_gusts_10m,precipitation_probability,precipitation,snowfall,weather_code,freezing_level_height';var url=OM_API+'?latitude='+lat+'&longitude='+lon+'&hourly='+vars+'&forecast_days=3&wind_speed_unit=kn&timezone=auto';
   fetch(url).then(function(r){if(!r.ok)throw new Error('status '+r.status);return r.json();}).then(function(d){btn.disabled=false;var h=d.hourly||{},rows=[];for(var i=0;i<(h.time||[]).length;i++){var when=new Date(h.time[i]);if(when.getTime()<Date.now()-3600000)continue;rows.push({time:h.time[i],vis:(h.visibility||[])[i],low:(h.cloud_cover_low||[])[i],spd:(h.wind_speed_10m||[])[i],dir:(h.wind_direction_10m||[])[i],gust:(h.wind_gusts_10m||[])[i],pop:(h.precipitation_probability||[])[i],precip:(h.precipitation||[])[i],snow:(h.snowfall||[])[i],code:(h.weather_code||[])[i],fz:(h.freezing_level_height||[])[i]});if(rows.length>=24)break;}var worst=['low','LOW','No major model signal'];rows.forEach(function(r){var z=omRisk(r.vis,r.gust,r.precip,r.code,r.low);if(z[0]==='high'||(z[0]==='med'&&worst[0]==='low'))worst=z;});var html='<div class="assess '+worst[0]+'"><div><h2>'+esc(label)+' — 24-hour model risk: '+worst[1]+' <span class="srcbadge">Open-Meteo</span></h2><p>'+worst[2]+'. Model guidance only; verify against official METAR, TAF and advisories.</p></div></div><div class="slabel">Hourly model guidance</div><div class="fcards">';rows.filter(function(_,i){return i%3===0;}).forEach(function(r){var z=omRisk(r.vis,r.gust,r.precip,r.code,r.low);html+='<div class="fcard '+(z[0]==='high'?'ifr':z[0]==='med'?'mvfr':'vfr')+'"><div class="ftop"><div class="ftime">'+fmtZ(r.time)+'<small>Local model time</small></div><span class="abadge '+z[0]+'">'+z[1]+'</span></div><div class="fgrid"><div><div class="k">Wind</div><div class="v">'+esc(windStr(Math.round(r.dir),Math.round(r.spd),Math.round(r.gust)))+'</div></div><div><div class="k">Visibility</div><div class="v">'+(r.vis==null?'—':(r.vis/1609.344).toFixed(1)+' mi')+'</div></div><div><div class="k">Low cloud</div><div class="v">'+(r.low==null?'—':r.low+'%')+'</div></div><div><div class="k">Precip chance</div><div class="v">'+(r.pop==null?'—':r.pop+'%')+'</div></div></div><div class="action"><span>'+z[2]+(r.snow>0?' · Snow signal':'')+(r.fz!=null?' · Freezing level '+Math.round(r.fz*3.28084)+' ft':'')+'</span></div></div>';});html+='</div>';out.innerHTML=html;}).catch(function(e){btn.disabled=false;out.innerHTML='<div class="err-box"><b>Open-Meteo request failed.</b> '+esc(e.message)+'</div>';});
 }
